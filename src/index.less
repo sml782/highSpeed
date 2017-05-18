@@ -1,0 +1,225 @@
+.f16 {
+    font-size: 16px;
+}
+
+/* 左侧导航固定宽度 */
+#leftMenu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background: #4778c7;
+    border-right: 1px solid #e9e9e9;
+    .ant-menu-dark {
+        background: #577FD1;
+        .ant-menu-item {
+            border-bottom: 1px solid #4A74BC;
+        }
+        .ant-menu-item-active {
+            background-color: #77a9ff;
+        }
+        .ant-menu-item-selected {
+            background-color: #77a9ff;
+            color:#fff;
+        }
+    }
+}
+
+
+/* logo样式 */
+#logo {
+    display: block;
+    margin: 20px auto;
+    transition:all 1s;
+
+    &:hover {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+/* 右侧宽度自适应 */
+#rightWrap {
+    box-sizing: border-box;
+    padding: 20px 20px 0 20px;
+    position: absolute;
+    top: 0;
+    left: 185px;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+
+}
+
+.right-box {
+    box-sizing: border-box;
+    padding: 20px 20px 0;
+    position: absolute;
+    top: 73px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+}
+
+#rightWrap .ant-menu-submenu {
+    float: right;
+}
+
+.chart-box {
+    margin-top: 30px;
+}
+
+.ege {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.ege a {
+    color: #009688;
+    font-size: 16px;
+}
+
+.lastPic {
+    display: block;
+    margin: 16% auto 0;
+}
+
+.ani-box {
+    text-align: center;
+}
+
+.doclist {
+    line-height: 40px;
+}
+
+//面包屑样式
+.breadcrumb-box{
+    margin-bottom: 20px;
+    color:#333;
+    // .top-bar{
+    //     height:8px;
+    //     background: #b5b5b5;
+    // }
+    .breadcrumb{
+        height:44px;
+        //padding:0 20px;
+        line-height: 44px;
+        .ant-breadcrumb{
+            font-size: 20px;
+        }
+    }
+}
+.box{
+    width:100%;
+    background:#fff;
+    /*margin-top:44px;*/
+    box-sizing: border-box;
+    padding:14px 20px;
+    /*min-height:700px;*/
+}
+.rightTopMenu{
+    background-color: #f0f0f0 !important;
+}
+
+.serverInput{
+    border:none;
+    width: 50px;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+}
+.displayBlock{
+    display: block !important;
+}
+
+.status-box{
+    width: 1000px;
+    height: 600px;
+    border: 1px solid #ccc;
+    margin-left: 7%;
+    margin-top: 1%;
+    position: relative;
+}
+.green-word{
+    color: #209970;
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 20px;
+    display: inline-block;
+    position: absolute;
+    top:75px;
+    
+}
+
+.red-word{
+    color: #a00b2e;
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 20px;
+    display: inline-block;
+    position: absolute;
+    top:75px;
+}
+
+.blue-word{
+    color:#4778c7;
+    margin-left: 40px;
+    cursor: pointer !important;
+}
+
+.blank{
+    width:100%;
+    height:100%;
+    background:url(assets/images/1.jpg) center center no-repeat;
+    background-size: 100% 90%;
+}
+
+//修改密码样式
+.update-password{
+    position:absolute;
+    top:44px;
+    left:-20px;
+    width:110px;
+    color:#333;
+    height:42px;
+    text-align:center;
+    line-height:42px;
+    background:#fff;
+    display:none;
+    z-index:999;
+}
+
+//表单样式
+.ant-form {
+    padding: 0 50px;
+}
+
+//表格样式
+.order-list .ant-table{
+    font-size: 14px;
+    line-height: 1;
+}
+
+.ant-table-tbody{
+    background: #FFFFFF;
+} 
+.order-list .ant-table-fixed .ant-table-thead > tr > th{
+    text-align: center;
+}
+.order-list .ant-table-fixed .ant-table-tbody > tr > td{
+    text-align: center;
+    div{
+        width: 100%;
+        height: 100%;
+        a{
+            display: block;
+            width: 50%;
+            height: 100%;
+            float: left;
+            &:last-child{
+                float: right;
+            }
+        }
+    }
+}
