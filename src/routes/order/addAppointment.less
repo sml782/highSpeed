@@ -4,13 +4,44 @@
 }
 .order-add-g .ant-form-item-control {
     width: 300px;
+    .ant-calendar-picker{
+        width: 100%;
+    }
+    .ant-calendar-picker{
+        width: 100%;
+    }
 }
 .order-add-g .title{
     border-bottom: 1px solid #ccc;
     font-size: 16px;
     font-weight: 700;
     line-height: 50px;
+    position: relative;
 }
 .ant-form-item-label{
     width: 100px;
 }
+
+//增加旅客按钮
+.passengerButton{
+    width: 170px;
+    position: absolute;
+    right: 0;
+    top:0;
+    .ant-btn{
+       position: absolute;
+       top:10px;
+       &:first-child{
+           left: 0;
+       }
+       &:last-child{
+           right: 0;
+       }
+    }
+}
+
+//提交
+.order-submit .ant-row .ant-btn {
+    width: 100px;
+    margin-left: 500px;
+}   

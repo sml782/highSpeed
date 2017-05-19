@@ -58,10 +58,10 @@ class SiderBar extends React.Component {
                     >
                         <Menu.Item key="1"><Link to="/order">订单管理</Link></Menu.Item>
                         <Menu.Item key="2"><Link to="/serviceBillings">服务账单</Link></Menu.Item>
-                        <Menu.Item key="3"><Link to="/chart">系统管理</Link></Menu.Item>
+                        <Menu.Item key="3"><Link to="/system">系统管理</Link></Menu.Item>
                         <Menu.Item key="4"><Link to="/employeeList">员工管理</Link></Menu.Item>
-                        <Menu.Item key="5"><Link to="/card">客户管理</Link></Menu.Item>
-                        <Menu.Item key="6"><Link to="/follow">产品管理</Link></Menu.Item>
+                        <Menu.Item key="5"><Link to="/clientManagement">客户管理</Link></Menu.Item>
+                        <Menu.Item key="6"><Link to="/products">产品管理</Link></Menu.Item>
                     </Menu>
                 </div>
                 <div id="rightWrap">

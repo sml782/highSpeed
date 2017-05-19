@@ -19,7 +19,6 @@ class Order extends React.Component {
     constructor (props) {
         super(props);
         this.state = {
-            formLayout: 'inline',
             listKey:1,
         }
     }
@@ -61,9 +60,8 @@ class Order extends React.Component {
     
 
     render () {
-        const { formLayout } = this.state;
         const { getFieldDecorator } = this.props.form;
-        const formCol = { span: 6, offset:1};
+        const formCol = { span: 8, offset:1};
         const buttonItemLayout = null;
         const rangeConfig = {
             rules: [{ type: 'array', required: true, message: '请选择时间!' }],
@@ -75,7 +73,7 @@ class Order extends React.Component {
                     <span>查询条件</span>
                 </div>
                 <div className="service-form">
-                    <Form layout={formLayout} className="order-search-g">
+                    <Form layout={'inline'} className="order-search-g">
                         <Row className="order-search">
                             <Col {...formCol}>
                                 <FormItem

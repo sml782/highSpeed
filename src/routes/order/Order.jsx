@@ -53,7 +53,7 @@ class Order extends React.Component {
     render () {
         const { getFieldDecorator } = this.props.form;
         const { formLayout } = this.state;
-        const formCol = { span: 4, offset:1};
+        const formCol = { span: 6, offset:1};
         const buttonItemLayout = null;
         const config = {
             rules: [{ type: 'object', message: '请选择高铁日期!' }],

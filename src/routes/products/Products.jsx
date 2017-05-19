@@ -1,8 +1,8 @@
-import './employee.less'
+import './products.less'
 
 import React from 'react';
 import { hashHistory } from 'react-router';
-import { Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Modal,AutoComplete } from 'antd';
+import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Modal,AutoComplete} from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData} from '../../utils/config';
@@ -13,7 +13,6 @@ const Option = Select.Option;
 const Search = Input.Search;
 const AutoCompleteOption = AutoComplete.Option;
 const msg = '确认删除该员工吗?';
-const serveUrl = 'http://localhost:8888/'
 
 class ServiceList extends React.Component {
     constructor(props) {
@@ -29,11 +28,15 @@ class ServiceList extends React.Component {
             searchValue:'',
             menuListDate:[],
             menuIds:[],
-            employeeList:[],
             visibleDel:false,
             visibleAdd:false,
             employeeId:null,
-            highspeedResult:[],
+            autoCompleteResult:[],
+            sortedInfo:{},
+            filteredInfo:{},
+            loungeCodeResult:[],
+            loungeNameResult:[],
+            highSpeedStationResult:[],
         }
     }
 
@@ -47,9 +50,10 @@ class ServiceList extends React.Component {
         for(var i = 0;i < 100;i++){
             data.push({
                 key:i,
-                name:`张${i}`,
-                phone:Math.floor(Math.random()*10000000000+13000000000),
-                onesSpeed:`杭州${i}`
+                code:Math.floor(Math.random()*2017),
+                name:`休息室${i}`,
+                station:['杭州东站','杭州城战'][Math.floor(Math.random())],
+                price:Math.floor(Math.random()*1000),
             })
         }
         this.setState({partListDate:data})
@@ -57,26 +61,6 @@ class ServiceList extends React.Component {
     componentDidMount=()=>{
         $(".ant-breadcrumb-separator").html(">");
         $(".ant-breadcrumb-separator").css({color:'#333'});
-        $.ajax({
-            type: "GET",
-            //url: serveUrl+"list",
-            url: serveUrl+"hsr-role/getEmployeeById?access_token="+ User.appendAccessToken().access_token,
-            success: function(data){
-                var employeeList = []
-                data.data.map((v,i)=>{
-                    employeeList.push({
-                        key:i,
-                        name:,
-                        phone:Math.floor(Math.random()*10000000000+13000000000),
-                        onesSpeed:`杭州${i}`
-                    })
-                })
-                _this.setState({
-                    partListDate: data.data.rows,
-                    partListDateLength:data.data.total
-                })
-            }
-        });
     }
 
     componentDidUpdate=()=>{    
@@ -91,70 +75,43 @@ class ServiceList extends React.Component {
      getInitList(page,rows){
         const data = [];
         const _this = this;
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                $.ajax({
-                    type: "GET",
-                    //url: serveUrl+"list",
-                    url: serveUrl+"guest-employee/list?access_token="+ User.appendAccessToken().access_token,
-                    data:{
-                        page:page,
-                        rows:rows,
-                        name:values.institutionClientName
-                        },
-                    success: function(data){
-                        data.data.rows.map((v,index)=>{
-                            v.key = v.employee_id
-                        })
-                        _this.setState({
-                            partListDate: data.data.rows,
-                            partListDateLength:data.data.total
-                        })
-                    }
-                });
-            }
-        });
+        // this.props.form.validateFieldsAndScroll((err, values) => {
+        //     if (!err) {
+        //         $.ajax({
+        //             type: "GET",
+        //             //url: serveUrl+"list",
+        //             url: serveUrl+"guest-employee/list?access_token="+ User.appendAccessToken().access_token,
+        //             data:{
+        //                 page:page,
+        //                 rows:rows,
+        //                 name:values.institutionClientName
+        //                 },
+        //             success: function(data){
+        //                 data.data.rows.map((v,index)=>{
+        //                     v.key = v.employee_id
+        //                 })
+        //                 _this.setState({
+        //                     partListDate: data.data.rows,
+        //                     partListDateLength:data.data.total
+        //                 })
+        //             }
+        //         });
+        //     }
+        // });
     }
 
     //删除弹框
     showModalDel = (record) => {
         this.setState({
             visibleDel: true,
-            //employeeId:record.employee_id
         });
     }
     //删除确认
     handleOkDel = () => {
         this.setState({
-                visibleDel: false
-            });
-        // setTimeout(() => {
-        //     this.setState({
-        //         visibleDel: false
-        //     });
-        //     //删除协议
-        //     const _this = this;
-        //     $.ajax({
-        //         type: "POST",
-        //         contentType: 'application/json;charset=utf-8',
-        //         url: serveUrl + "guest-employee/delete?access_token="+User.appendAccessToken().access_token,
-        //         data: JSON.stringify({
-        //             data: [parseInt(_this.state.employeeId)]
-        //         }),
-        //         success: function (data) {
-        //             if(data.status == 200 ){
-        //                 if(data.data != null){
-        //                     message.error(data.data);
-        //                 }else{
-        //                     message.success(data.msg);
-        //                 }
-        //             }else{
-        //                 message.error(data.msg);
-        //             }
-        //             _this.getInitList(_this.state.partListDateCurrent,_this.state.partListDatePageSize)
-        //         }
-        //     });
-        // }, 1000);
+            visibleDel: false
+        });
+        
     }
     //删除取消
     handleCancelDel = () => {
@@ -162,8 +119,14 @@ class ServiceList extends React.Component {
             visibleDel: false
         });
     }
+    
+    //编辑员工弹窗
+    showAdd = (record) => {
+        console.log(record)
+        this.setState({visibleAdd:true})
+    }
     //增加员工
-    addEmployeeBtn=(record)=>{
+    addClientBtn = (record) => {
         this.setState({visibleAdd:true})
     }
 
@@ -180,9 +143,22 @@ class ServiceList extends React.Component {
 
     render() {
         const { getFieldDecorator } = this.props.form;
+        const { autoCompleteResult } = this.state;
+        let { sortedInfo, filteredInfo } = this.state;
+        sortedInfo = sortedInfo || {};
+        filteredInfo = filteredInfo || {};
         const _this = this;
         const columns = [ {
-            title: '员工姓名',
+            title: '休息室代码',
+            width: '20%',
+            dataIndex: 'code',
+            render(text,record) {
+                return (
+                        <div className="order">{text}</div>
+                        )
+            }
+        }, {
+            title: '休息室名称',
             width: '20%',
             dataIndex: 'name',
             render(text,record) {
@@ -191,18 +167,20 @@ class ServiceList extends React.Component {
                         )
             }
         }, {
-            title: '手机号',
-            width: '20%',
-            dataIndex: 'phone',
+            title: '所属高铁站',
+            width: '25%',
+            dataIndex: 'station',
             render(text,record) {
                 return (
                         <div className="order">{text}</div>
                         )
             }
         }, {
-            title: '所属高铁站',
-            width: '20%',
-            dataIndex: 'onesSpeed',
+            title: '零售价格',
+            width: '15%',
+            dataIndex: 'price',
+            sorter: (a, b) => a.name.length - b.name.length,
+            sortOrder: sortedInfo.columnKey === 'name' && sortedInfo.order,
             render(text,record) {
                 return (
                         <div className="order">{text}</div>
@@ -210,12 +188,13 @@ class ServiceList extends React.Component {
             }
         },{
             title: '操作',
-            width: '40%',
+            width: '20%',
+            dataIndex: 'handle',
             render(text,record) {
                 return (
                         <div className="order">
                             <a onClick={_this.showModalDel.bind(_this,record)} style={{color:'#4778c7'}}>删除</a>&nbsp;&nbsp;
-                            <a onClick={_this.addEmployeeBtn.bind(_this,record)} style={{marginRight:10,color:'#4778c7'}}>编辑</a>
+                            <a onClick={_this.showAdd.bind(_this,record)} style={{marginRight:10,color:'#4778c7'}}>编辑</a>
                         </div>
                         )
             }
@@ -257,9 +236,19 @@ class ServiceList extends React.Component {
             },
         },
       };
-
-      const { highspeedResult } = this.state;
-      const highSpeedStation = highspeedResult.map((station) => {
+      //休息室代码
+      const { loungeCodeResult } = this.state;
+      const loungeCode = loungeCodeResult.map((code) => {
+        return <AutoCompleteOption key={code}>{code}</AutoCompleteOption>;
+      });
+      //休息室名称
+      const { loungeNameResult } = this.state;
+      const loungeName = loungeNameResult.map((name) => {
+        return <AutoCompleteOption key={name}>{name}</AutoCompleteOption>;
+      });
+      //高铁站
+      const { highSpeedStationResult } = this.state;
+      const highSpeedStation = highSpeedStationResult.map((station) => {
         return <AutoCompleteOption key={station}>{station}</AutoCompleteOption>;
       });
        
@@ -269,7 +258,8 @@ class ServiceList extends React.Component {
                     <div className="top-bar"></div>
                     <div className="breadcrumb">
                         <Breadcrumb>
-                            <Breadcrumb.Item>员工管理</Breadcrumb.Item>
+                            <Breadcrumb.Item>产品管理</Breadcrumb.Item>
+                            <Breadcrumb.Item>休息室管理</Breadcrumb.Item>
                         </Breadcrumb>
                     </div>
                 </div>
@@ -278,21 +268,21 @@ class ServiceList extends React.Component {
                     
                     <Row>
                         <Col>
-                            <button className="btn" onClick={this.addEmployeeBtn}>新增员工</button>
+                            <button className="btn" onClick={this.addClientBtn.bind(this)}>添加休息室</button>
                         </Col>
                         <Col style={{marginLeft:200}}>
                             <Form layout={'inline'}
                                 className="ant-advanced-search-form"
                                 onSubmit={this.getInitList.bind(this,this.state.partListDateCurrent,this.state.partListDatePageSize)}
-                            >
+                                >
                                 <Row>
                                     <Col span={10}>
-                                        <FormItem label="员工姓名:" hasFeedback>
+                                        <FormItem label="客户姓名:" hasFeedback>
                                             {getFieldDecorator('institutionClientName', {
                                             })(
                                                 <AutoComplete
                                                     dataSource={this.state.AutoClientList}
-                                                    placeholder="请输入员工姓名"
+                                                    placeholder="请输入客户姓名"
                                                     style={{width:170}}
                                                 />
                                             )}
@@ -307,7 +297,7 @@ class ServiceList extends React.Component {
                         
                         <div className="search-result-list" >
                             <p style={{marginTop: 20}}>共搜索到{this.state.partListDateLength}条数据</p>
-                            <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={this.state.partListDate}  className=" serveTable"/>
+                            <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={this.state.partListDate}  className="serveTable"/>
                         </div>
                     </Row>
                  </div>
@@ -331,25 +321,34 @@ class ServiceList extends React.Component {
                         <Form onSubmit={this.handleSubmit}>
                             <FormItem
                                 {...formI}
-                                label={(
-                                    <span>员工姓名&nbsp;</span>
-                                )}
-                                hasFeedback
+                                label="休息室代码"
                             >
-                                {getFieldDecorator('employeeName', {
-                                    rules: [{ required: true, message: '请输入员工姓名!', whitespace: true }],
+                                {getFieldDecorator('code', {
+                                    rules: [{ message: '请输入休息室代码!' }],
                                 })(
-                                    <Input placeholder="请输入员工姓名" />
+                                    <AutoComplete
+                                        dataSource={loungeCode}
+                                        // onChange={this.handleWebsiteChange}
+                                        placeholder="请输入休息室代码"
+                                    >
+                                        <Input />
+                                    </AutoComplete>
                                 )}
-                           </FormItem>
-                           <FormItem
+                            </FormItem>
+                            <FormItem
                                 {...formI}
-                                label="手机号码"
+                                label="休息室名称"
                             >
-                                {getFieldDecorator('phone', {
-                                    rules: [{ required: true, message: '请输入手机号!', pattern:/^1[3|4|5|7|8][0-9]\d{4,8}$/ }],
+                                {getFieldDecorator('name', {
+                                    rules: [{ message: '请输入休息室名称!' }],
                                 })(
-                                    <Input placeholder="请输入手机号" />
+                                    <AutoComplete
+                                        dataSource={loungeName}
+                                        // onChange={this.handleWebsiteChange}
+                                        placeholder="请输入休息室名称"
+                                    >
+                                        <Input />
+                                    </AutoComplete>
                                 )}
                             </FormItem>
                             <FormItem
@@ -357,7 +356,7 @@ class ServiceList extends React.Component {
                                 label="所属高铁站"
                             >
                                 {getFieldDecorator('station', {
-                                    rules: [{ required: true, message: '请输入高铁站!' }],
+                                    rules: [{ message: '请输入高铁站!' }],
                                 })(
                                     <AutoComplete
                                         dataSource={highSpeedStation}
@@ -368,6 +367,19 @@ class ServiceList extends React.Component {
                                     </AutoComplete>
                                 )}
                             </FormItem>
+                            <FormItem
+                                {...formI}
+                                label={(
+                                    <span>零售价格&nbsp;</span>
+                                )}
+                                hasFeedback
+                            >
+                                {getFieldDecorator('employeeName', {
+                                    rules: [{ message: '请输入零售价格!', whitespace: true }],
+                                })(
+                                    <Input placeholder="请输入员工姓名" />
+                                )}
+                           </FormItem>
                         </Form>
                        
                      </div>

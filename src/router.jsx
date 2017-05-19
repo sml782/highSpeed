@@ -23,12 +23,17 @@ import AddAppointment from './routes/order/AddAppointment'
 import ServiceBillings from './routes/serviceBillings/ServiceBillings'
 
 //系统管理
-
+import System from './routes/system/System'
+import AddPart from './routes/system/AddPart'
 
 //员工管理
 import EmployeeList from './routes/employee/EmployeeList'
-import UpdataEmployee from './routes/employee/UpdataEmployee'
-import AddEmployee from './routes/employee/AddEmployee'
+
+//客户管理
+import ClientManagement from './routes/clientmanagement/ClientManagement'
+
+//产品管理
+import Products from './routes/products/Products'
 
 export default (
     <Router history={hashHistory}>
@@ -38,9 +43,14 @@ export default (
             <Route path="addAppointment" component={AddAppointment} />
             <Route path="serviceBillings" component={ServiceBillings} />
 
+            <Route path="system" component={System} />
+            <Route path="addPart" component={AddPart} />
+
             <Route path="employeeList" component={EmployeeList} />
-            <Route path="updataEmployee(/:id)" component={UpdataEmployee} />
-            <Route path="addEmployee(/:id)" component={AddEmployee} />
+
+            <Route path="clientManagement" component={ClientManagement} />
+
+            <Route path="products" component={Products} />
             
             <Route path="/login" component={Login} />
             <Route path="/reg" component={Reg} />

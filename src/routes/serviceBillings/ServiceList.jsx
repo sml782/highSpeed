@@ -203,7 +203,7 @@ class OrderList extends React.Component {
     componentDidMount () {
         //TODO AJAX
         console.log(this.props.listKey*1)
-        var inp = $('.ant-tabs-tabpane-active').find('.service-form').find('.ant-row.order-search').eq(1).find('.ant-col-6')
+        var inp = $('.ant-tabs-tabpane-active').find('.service-form').find('.ant-row.order-search').eq(1).find('.ant-col-8')
         if(this.props.listKey * 1 == 1){
             inp.eq(2).hide()
         }else{
