@@ -44,7 +44,7 @@ export default (
             <Route path="serviceBillings" component={ServiceBillings} />
 
             <Route path="system" component={System} />
-            <Route path="addPart" component={AddPart} />
+            <Route path="addPart(/:roleId)" component={AddPart} />
 
             <Route path="employeeList" component={EmployeeList} />
 

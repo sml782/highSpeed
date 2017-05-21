@@ -20,6 +20,7 @@ class ServiceList extends React.Component {
         this.state = {
             productTypeData:[],
             serveTypeData:[],
+            roleId:1,
             partListDate: [],
             partListDateLength:null,
             partListDateCurrent:1,
@@ -29,8 +30,6 @@ class ServiceList extends React.Component {
             menuListDate:[],
             menuIds:[],
             visibleDel:false,
-            visibleAdd:false,
-            employeeId:null,
             clientTypeResult:[],
         }
     }
@@ -45,10 +44,11 @@ class ServiceList extends React.Component {
         for(var i = 0;i < 100;i++){
             data.push({
                 key:i,
-                name:['张三','李四','王五'][Math.floor(Math.random()*2)],
-                loginName:['a','b','c'][Math.floor(Math.random()*2)],
-                retiring:['A10','B20','C30'][Math.floor(Math.random()*2)],
-                jurisdiction:['A10','B20','C30'][Math.floor(Math.random()*2)],
+                roleId:i,
+                name:['张三','李四','王五'][Math.floor(Math.random()*3)],
+                account:['a','b','c'][Math.floor(Math.random()*3)],
+                retiring:['A10','B20','C30'][Math.floor(Math.random()*3)],
+                productName:['A10','B20','C30'][Math.floor(Math.random()*3)],
             })
         }
         this.setState({partListDate:data, partListDateLength:data.length})
@@ -143,19 +143,21 @@ class ServiceList extends React.Component {
     }
     
 
-    //增加管理员
-    addPartBtn = (record) => {
-        
+    //编辑角色
+    editPart = (record) => {
+        var roleId = record.roleId
+        console.log(roleId)
+        hashHistory.push(`/addPart/${roleId}`)
     }
 
     //添加/修改
     handleOk(){
-        this.setState({visibleAdd:false})
+        
     }
 
     //取消添加/修改
     handleCancel(){
-        this.setState({visibleAdd:false})
+        
     }
     
 
@@ -174,7 +176,7 @@ class ServiceList extends React.Component {
         }, {
             title: '登录名称',
             width: '15%',
-            dataIndex: 'loginName',
+            dataIndex: 'account',
             render(text,record) {
                 return (
                         <div className="order">{text}</div>
@@ -192,7 +194,7 @@ class ServiceList extends React.Component {
         }, {
             title: '菜单权限',
             width: '20%',
-            dataIndex: 'jurisdiction',
+            dataIndex: 'productName',
             render(text,record) {
                 return (
                         <div className="order">{text}</div>
@@ -206,7 +208,7 @@ class ServiceList extends React.Component {
                 return (
                         <div className="order">
                             <a onClick={_this.showModalDel.bind(_this,record)} style={{color:'#4778c7'}}>删除</a>&nbsp;&nbsp;
-                            <a style={{marginRight:10,color:'#4778c7'}}>编辑</a>
+                            <a onClick={_this.editPart.bind(_this,record)} style={{marginRight:10,color:'#4778c7'}}>编辑</a>
                         </div>
                         )
             }
@@ -263,30 +265,6 @@ class ServiceList extends React.Component {
                     <Row>
                         <Col>
                             <button className="btn"><Link to="/addPart" style={{color:'#fff'}} >添加角色</Link></button>
-                        </Col>
-                        <Col style={{marginLeft:200}}>
-                            <Form layout={'inline'}
-                                className="ant-advanced-search-form"
-                                onSubmit={this.getInitList.bind(this,this.state.partListDateCurrent,this.state.partListDatePageSize)}
-                                >
-                                <Row>
-                                    <Col span={10}>
-                                        <FormItem label="管理员姓名:" hasFeedback>
-                                            {getFieldDecorator('administrator', {
-                                            })(
-                                                <AutoComplete
-                                                    dataSource={this.state.AutoClientList}
-                                                    placeholder="请输入管理员姓名"
-                                                    style={{width:170}}
-                                                />
-                                            )}
-                                        </FormItem>
-                                    </Col>
-                                    <Col span={4}>
-                                        <button className='btn-small' onClick={this.handleSearch}>查&nbsp;&nbsp;询</button>
-                                    </Col>
-                                </Row>
-                            </Form>
                         </Col>
                         <div className="search-result-list" >
                             <p style={{marginTop: 20}}>共有{this.state.partListDateLength}条数据</p>

@@ -38,7 +38,7 @@ class AddPart extends React.Component {
         //     hashHistory.push('/login');
         // }
         // this.getInit()
-        
+        console.log(this.props.params.roleId)
     }
     componentDidMount=()=>{
         $(".ant-breadcrumb-separator").html(">");
@@ -293,7 +293,7 @@ class AddPart extends React.Component {
                     <div className="top-bar"></div>
                     <div className="breadcrumb">
                         <Breadcrumb>
-                            <Breadcrumb.Item>系统管理</Breadcrumb.Item>
+                            <Breadcrumb.Item><Link to='/system' >系统管理</Link></Breadcrumb.Item>
                             <Breadcrumb.Item>新增角色</Breadcrumb.Item>
                         </Breadcrumb>
                     </div>

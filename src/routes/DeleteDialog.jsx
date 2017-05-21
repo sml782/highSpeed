@@ -17,10 +17,10 @@ class DeleteDialog extends React.Component {
         }
     }
     componentWillMount=()=>{
-         if(User.isLogin()){
-        } else{
-            hashHistory.push('/login');
-        }
+        //  if(User.isLogin()){
+        // } else{
+        //     hashHistory.push('/login');
+        // }
     }
     componentDidMount=()=>{
         $(".ant-modal-header").css({background:'#f4f7f9'});
