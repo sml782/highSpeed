@@ -25,7 +25,7 @@ columns[0] = [{
   dataIndex: 'name1',
   width:110,
 }, {
-  title: '服务次数',
+  title: '服务人次',
   dataIndex: 'degree1',
   width:110,
 }, {
@@ -91,10 +91,6 @@ columns[1] = [{
   title: '开车时间',
   dataIndex: 'drivingTime',
   width:130,
-}, {
-  title: '服务次数',
-  dataIndex: 'count',
-  width:100,
 }, {
   title: '检票时间',
   dataIndex: 'checkinTime',
@@ -203,6 +199,8 @@ class OrderList extends React.Component {
     componentDidMount () {
         //TODO AJAX
         console.log(this.props.listKey*1)
+        //console.log($('.ant-tabs-content').find('.ant-tabs-tabpane').not(':first-child').find('.server-search').find('.server-detail'))
+        $('.ant-tabs-content').find('.ant-tabs-tabpane').not(':first-child').find('.server-search').find('.server-detail').hide()
         var inp = $('.ant-tabs-tabpane-active').find('.service-form').find('.ant-row.order-search').eq(1).find('.ant-col-8')
         if(this.props.listKey * 1 == 1){
             inp.eq(2).hide()

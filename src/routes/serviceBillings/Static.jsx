@@ -121,9 +121,9 @@ class Order extends React.Component {
                         </Row>
                         <Row className="order-search service-serc">
                             <Col  {...formCol}>
-                               <FormItem {...buttonItemLayout}>
+                               <FormItem {...buttonItemLayout} className="server-search">
                                     <Button type="primary" size="large">搜索</Button>
-                                    <Button type="primary" size="large">明细账单</Button>
+                                    <Button className="server-detail" type="primary" size="large">明细账单</Button>
                                 </FormItem>
                             </Col>
                         </Row>

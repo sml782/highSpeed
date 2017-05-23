@@ -1,6 +1,8 @@
 // const serveUrl='http://ifeicloud.zhiweicloud.com/';
-const serveUrl='https://api.iairportcloud.com/';
+//const serveUrl='https://api.iairportcloud.com/';
 // const serveUrl='http://101.37.106.176/';
+const serveUrl = 'http://192.168.0.147:8888'
+const access_token = '44yeg88EAgw3jzkybRYra1XXUb9gFanOp3HRuvlD'
 const userMsg = {};
 const billClient={};
 
@@ -188,5 +190,5 @@ var userClass = function() {
     }
 
     export default {
-        formatDateTime,serveUrl,cacheData,User,protocolMsg,newAddFlag,loginFlag,userMsg,getCookie,setCookie,billClient,defaultEvent
+        formatDateTime,serveUrl,access_token,cacheData,User,protocolMsg,newAddFlag,loginFlag,userMsg,getCookie,setCookie,billClient,defaultEvent
     };

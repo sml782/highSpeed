@@ -1,6 +1,7 @@
 import './system.less'
 
-import Part from './Part'
+import Part from '../part/Part'
+import Menu from '../menu/Menu'
 
 import React from 'react'
 import { hashHistory } from 'react-router'
@@ -69,7 +70,7 @@ class System extends React.Component {
                             <Part />
                         </TabPane>
                         <TabPane tab="菜单管理" key="2">
-                            
+                            <Menu />
                         </TabPane>
                     </Tabs>
                 </div>

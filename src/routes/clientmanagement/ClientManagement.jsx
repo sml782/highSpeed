@@ -275,31 +275,7 @@ class ServiceList extends React.Component {
                         <Col>
                             <button className="btn" onClick={this.addClientBtn.bind(this)}>新增客户</button>
                         </Col>
-                        <Col style={{marginLeft:200}}>
-                            <Form layout={'inline'}
-                                className="ant-advanced-search-form"
-                                onSubmit={this.getInitList.bind(this,this.state.partListDateCurrent,this.state.partListDatePageSize)}
-                                >
-                                <Row>
-                                    <Col span={10}>
-                                        <FormItem label="客户姓名:" hasFeedback>
-                                            {getFieldDecorator('institutionClientName', {
-                                            })(
-                                                <AutoComplete
-                                                    dataSource={this.state.AutoClientList}
-                                                    placeholder="请输入客户姓名"
-                                                    style={{width:170}}
-                                                />
-                                            )}
-                                        </FormItem>
-                                    </Col>
-                                    <Col span={4}>
-                                        <button className='btn-small' onClick={this.handleSearch}>查&nbsp;&nbsp;询</button>
-                                    </Col>
-                                </Row>
-                            </Form>
-                        </Col>
-                        
+        
                         <div className="search-result-list" >
                             <p style={{marginTop: 20}}>共搜索到{this.state.partListDateLength}条数据</p>
                             <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={this.state.partListDate}  className="serveTable"/>

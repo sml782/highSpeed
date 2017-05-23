@@ -8,6 +8,7 @@ import { Breadcrumb, Form, Row, Col, Input, Button, Icon, Select, Popconfirm, me
 import { Link } from 'react-router'
 import $ from 'jquery'
 import moment from 'moment'
+import { serveUrl, User, cacheData, loginFlag,userMsg,setCookie,getCookie } from '../../utils/config';
 
 const FormItem = Form.Item;
 
@@ -20,7 +21,12 @@ class Order extends React.Component {
     }
 
     componentWillMount () {
+        // if(User.isLogin()){
 
+        // } else{
+        //     hashHistory.push('/login');
+        // }
+        
     }
 
     componentDidMount () {

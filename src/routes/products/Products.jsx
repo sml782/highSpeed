@@ -5,38 +5,38 @@ import { hashHistory } from 'react-router';
 import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Modal,AutoComplete} from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
-import { serveUrl, User, cacheData} from '../../utils/config';
+import { serveUrl, User, cacheData, access_token} from '../../utils/config';
 import DeleteDialog from '../DeleteDialog';//引入删除弹框
+import getTrainStation from '../../utils/station';//引入所属高铁站
 
 const FormItem = Form.Item;
 const Option = Select.Option;
 const Search = Input.Search;
 const AutoCompleteOption = AutoComplete.Option;
-const msg = '确认删除该员工吗?';
+const msg = '确认删除该产品吗?';
 
 class ServiceList extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            productTypeData:[],
-            serveTypeData:[],
-            partListDate: [],
-            partListDateLength:null,
-            partListDateCurrent:1,
-            partListDatePageSize:10,
+            productListDate: [],
+            productListDateLength:null,
+            productListDateCurrent:1,
+            productsListDatePageSize:10,
             selectedRowKeys: [],
-            searchValue:'',
             menuListDate:[],
             menuIds:[],
             visibleDel:false,
             visibleAdd:false,
-            employeeId:null,
+            addKey:0,
             autoCompleteResult:[],
             sortedInfo:{},
             filteredInfo:{},
-            loungeCodeResult:[],
-            loungeNameResult:[],
-            highSpeedStationResult:[],
+            productCodeResult:[],
+            nameResult:[],
+            trainStation:[],
+            handleKey:undefined,
+            selectedProduct:{},
         }
     }
 
@@ -45,29 +45,30 @@ class ServiceList extends React.Component {
         // } else{
         //     hashHistory.push('/login');
         // }
-        this.getInitList(this.state.partListDateCurrent,this.state.partListDatePageSize)
-        var data = []
-        for(var i = 0;i < 100;i++){
-            data.push({
-                key:i,
-                code:Math.floor(Math.random()*2017),
-                name:`休息室${i}`,
-                station:['杭州东站','杭州城战'][Math.floor(Math.random())],
-                price:Math.floor(Math.random()*1000),
-            })
-        }
-        this.setState({partListDate:data})
+        this.getInitList(this.state.productListDateCurrent,this.state.productsListDatePageSize)
     }
     componentDidMount=()=>{
         $(".ant-breadcrumb-separator").html(">");
         $(".ant-breadcrumb-separator").css({color:'#333'});
+        //获取产品列表
+        // $.ajax({
+        //     type: "GET",
+        //     //url: serveUrl+"/hsr-product/getProductByHsOrId?access_token="+ User.appendAccessToken().access_token,
+        //     url: serveUrl+"/hsr-product/getProductAll?access_token="+ access_token,
+        //     success: function(data){
+        //         _this.setState({
+        //             productListDate: data.data,
+        //             productListDateLength:data.data.length,
+        //         })
+        //     }
+        // })
     }
 
     componentDidUpdate=()=>{    
         $(".ant-table-tbody tr td").css({borderBottom:'none'});
         $("table").css({border:'1px solid #f0f0f0'});
     }
-   handleSubmit =(e)=>{
+    handleSubmit =(e)=>{
        console.log(e)
        e.preventDefault()
     }
@@ -75,42 +76,85 @@ class ServiceList extends React.Component {
      getInitList(page,rows){
         const data = [];
         const _this = this;
-        // this.props.form.validateFieldsAndScroll((err, values) => {
-        //     if (!err) {
-        //         $.ajax({
-        //             type: "GET",
-        //             //url: serveUrl+"list",
-        //             url: serveUrl+"guest-employee/list?access_token="+ User.appendAccessToken().access_token,
-        //             data:{
-        //                 page:page,
-        //                 rows:rows,
-        //                 name:values.institutionClientName
-        //                 },
-        //             success: function(data){
-        //                 data.data.rows.map((v,index)=>{
-        //                     v.key = v.employee_id
-        //                 })
-        //                 _this.setState({
-        //                     partListDate: data.data.rows,
-        //                     partListDateLength:data.data.total
-        //                 })
-        //             }
-        //         });
-        //     }
-        // });
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            if (!err) {
+                $.ajax({
+                    type: "GET",
+                    //url: serveUrl+"/hsr-product/getProductAll?access_token="+ User.appendAccessToken().access_token,
+                    url: serveUrl+"/hsr-product/getProductAll?access_token="+ access_token,
+                    contentType: 'application/json;charset=utf-8',
+                    data:JSON.stringify({
+                        page:page,
+                        rows:rows,
+                        name:values.institutionClientName
+                        }),
+                    success: function(data){
+                        data.data.rows.map((v,index)=>{
+                            v.key = v.employee_id
+                        })
+                        _this.setState({
+                            productListDate: data.data.rows,
+                            productListDateLength:data.data.total
+                        })
+                    }
+                });
+            }
+        });
+    }
+
+    //获取高铁站
+    handleStationChange = (value) => {
+        const _this = this
+        if(value !== ''){
+            setTimeout(() => {
+                getTrainStation(value,(station) => {
+                    console.log(station)
+                    const trainStation = station.map((s) => {
+                        return <AutoCompleteOption key={s.value}>{s.value}</AutoCompleteOption>;
+                    })
+                    _this.setState({ trainStation: trainStation})
+                })
+                
+
+                
+            },300)
+        }
     }
 
     //删除弹框
     showModalDel = (record) => {
-        this.setState({
-            visibleDel: true,
-        });
+        console.log(record)
+        this.setState({ visibleDel: true, handleKey: record.productId });
     }
     //删除确认
     handleOkDel = () => {
-        this.setState({
-            visibleDel: false
-        });
+        const _this = this
+        // $.ajax({
+        //     type: "POST",
+        //     contentType: 'application/json;charset=utf-8',
+        //     url: serveUrl + "/hsr-product/deleteProduct?access_token="+User.appendAccessToken().access_token,
+        //      data:JSON.stringify({ 
+        //          data: {
+        //                  productId: _this.state.handleKey
+        //              }
+        //          }),      
+        //     success: function (data) {
+        //         if(data.status == 200 ){
+        //             if(data.data != null){
+        //                 message.error(data.data);
+        //             }else{
+        //                 message.success(data.msg);
+        //                 this.setState({
+        //                     visibleDel: false
+        //                 });
+        //             }
+        //         }else{
+        //             message.error(data.msg);
+        //         }
+        //         _this.getInitList(_this.state.productListDateCurrent,_this.state.productsListDatePageSize)
+        //     }
+        // });
+        
         
     }
     //删除取消
@@ -120,24 +164,118 @@ class ServiceList extends React.Component {
         });
     }
     
-    //编辑员工弹窗
+    //编辑产品弹窗
     showAdd = (record) => {
-        console.log(record)
-        this.setState({visibleAdd:true})
-    }
-    //增加员工
-    addClientBtn = (record) => {
-        this.setState({visibleAdd:true})
+        this.setState({ visibleAdd:true })
+        if(!record.dispatchConfig){
+            console.log(record)
+            var product 
+            var addKey = this.state.addKey
+            this.state.productListDate.map((v,i) => {
+                if(v.productId == record.productId){
+                    product = v
+                }
+            })
+            this.props.form.setFieldsValue({
+                productCode:product.productCode,
+                name:product.name,
+                trainStation:product.trainStation,
+                price:product.price,
+            })
+            
+            console.log(product)
+            this.setState({ selectedProduct: product, addKey:++addKey, handleKey: record.productId })
+            // $.ajax({
+            //     type: "GET",
+            //     contentType: 'application/json;charset=utf-8',
+            //     url: serveUrl + "/hsr-product/getProductById?access_token="+User.appendAccessToken().access_token,
+            //     data:JSON.stringify({
+            //             productId: record.productId
+            //          }),
+            //     success: function (data) {
+            //         if(data.status == 200 ){
+            //             if(data.data != null){
+            //                 message.error(data.msg);
+            //             }else{
+            //                 message.success(data.msg);
+            //                 _this.props.form.setFieldsValue({
+            //                      productCode:data.data.productCode,
+            //                      name:data.data.name,
+            //                      trainStation:data.data.trainStation,
+            //                      price:data.data.price,
+            //                 })
+            //                 this.setState({ selectedProduct: data.data })
+            //             }
+            //         }else{
+            //             message.error(data.msg);
+            //         }
+            //     }
+            // });
+        }else{
+            this.setState({ selectedProduct: {} })
+        }
     }
 
-    //添加/修改
+    //添加/修改确认
     handleOk(){
-        this.setState({visibleAdd:false})
+        const _this = this
+        const dtd = $.Deferred()
+        var trainStation, arr = [], product
+        this.props.form.validateFields((err, values) => {
+            if(!err){
+                const setData = (dtd) => {
+                        console.log(values)
+                        trainStation = this.state.trainStation
+                        product = this.state.selectedProduct
+                        arr = Object.keys(product)
+                        trainStation.map((v,i) => {
+                            if(v.value == values.trainStation){
+                                values.trainStationId = v.trainStationId
+                            }
+                        }) 
+                        product = $.extend(product,values)
+                        console.log(product)
+                        dtd.reject()
+                        return dtd
+                }
+                $.when(setData(dtd)).
+                    done(
+                    $.ajax({
+                        type: "POST",
+                        contentType: 'application/json;charset=utf-8',
+                        url: serveUrl + "/hsr-product/updateProduct?access_token="+User.appendAccessToken().access_token,
+                        beforeSend:() => {
+                            console.log(arr)
+                        },
+                        data: JSON.stringify({
+                                data:arr.length?product:values
+                            }),      
+                        success: function (data) {
+                            if(data.status == 200 ){
+                                if(data.data != null){
+                                    message.error(data.data);
+                                }else{
+                                    message.success(data.msg);
+                                }
+                            }else{
+                                message.error(data.msg);
+                            }
+                            _this.getInitList(_this.state.productListDateCurrent,_this.state.productsListDatePageSize)
+                            }
+                        })
+                    )
+                    
+                }
+            
+        })
+        
+        
     }
 
     //取消添加/修改
     handleCancel(){
         this.setState({visibleAdd:false})
+        this.props.form.resetFields()
     }
     
 
@@ -151,7 +289,7 @@ class ServiceList extends React.Component {
         const columns = [ {
             title: '休息室代码',
             width: '20%',
-            dataIndex: 'code',
+            dataIndex: 'productCode',
             render(text,record) {
                 return (
                         <div className="order">{text}</div>
@@ -169,7 +307,7 @@ class ServiceList extends React.Component {
         }, {
             title: '所属高铁站',
             width: '25%',
-            dataIndex: 'station',
+            dataIndex: 'trainStation',
             render(text,record) {
                 return (
                         <div className="order">{text}</div>
@@ -201,15 +339,15 @@ class ServiceList extends React.Component {
         }];
 
        const pagination = {
-            total: this.state.partListDateLength,
+            total: this.state.productListDateLength,
             onShowSizeChange(current, pageSize) {
-                _this.state.partListDateCurrent = current;
-                _this.state.partListDatePageSize = pageSize;
-                _this.getInitList(_this.state.partListDateCurrent,_this.state.partListDatePageSize);
+                _this.state.productListDateCurrent = current;
+                _this.state.productsListDatePageSize = pageSize;
+                _this.getInitList(_this.state.productListDateCurrent,_this.state.productsListDatePageSize);
             },
             onChange(current) {
-                _this.state.partListDateCurrent = current;
-                _this.getInitList(_this.state.partListDateCurrent,_this.state.partListDatePageSize);
+                _this.state.productListDateCurrent = current;
+                _this.getInitList(_this.state.productListDateCurrent,_this.state.productsListDatePageSize);
             },
 
       };
@@ -236,21 +374,7 @@ class ServiceList extends React.Component {
             },
         },
       };
-      //休息室代码
-      const { loungeCodeResult } = this.state;
-      const loungeCode = loungeCodeResult.map((code) => {
-        return <AutoCompleteOption key={code}>{code}</AutoCompleteOption>;
-      });
-      //休息室名称
-      const { loungeNameResult } = this.state;
-      const loungeName = loungeNameResult.map((name) => {
-        return <AutoCompleteOption key={name}>{name}</AutoCompleteOption>;
-      });
-      //高铁站
-      const { highSpeedStationResult } = this.state;
-      const highSpeedStation = highSpeedStationResult.map((station) => {
-        return <AutoCompleteOption key={station}>{station}</AutoCompleteOption>;
-      });
+      
        
         return (
             <div>
@@ -268,36 +392,12 @@ class ServiceList extends React.Component {
                     
                     <Row>
                         <Col>
-                            <button className="btn" onClick={this.addClientBtn.bind(this)}>添加休息室</button>
-                        </Col>
-                        <Col style={{marginLeft:200}}>
-                            <Form layout={'inline'}
-                                className="ant-advanced-search-form"
-                                onSubmit={this.getInitList.bind(this,this.state.partListDateCurrent,this.state.partListDatePageSize)}
-                                >
-                                <Row>
-                                    <Col span={10}>
-                                        <FormItem label="客户姓名:" hasFeedback>
-                                            {getFieldDecorator('institutionClientName', {
-                                            })(
-                                                <AutoComplete
-                                                    dataSource={this.state.AutoClientList}
-                                                    placeholder="请输入客户姓名"
-                                                    style={{width:170}}
-                                                />
-                                            )}
-                                        </FormItem>
-                                    </Col>
-                                    <Col span={4}>
-                                        <button className='btn-small' onClick={this.handleSearch}>查&nbsp;&nbsp;询</button>
-                                    </Col>
-                                </Row>
-                            </Form>
+                            <button className="btn" onClick={_this.showAdd.bind(_this)}>添加休息室</button>
                         </Col>
                         
                         <div className="search-result-list" >
-                            <p style={{marginTop: 20}}>共搜索到{this.state.partListDateLength}条数据</p>
-                            <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={this.state.partListDate}  className="serveTable"/>
+                            <p style={{marginTop: 20}}>共搜索到{this.state.productListDateLength}条数据</p>
+                            <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={this.state.productListDate}  className="serveTable"/>
                         </div>
                     </Row>
                  </div>
@@ -312,7 +412,7 @@ class ServiceList extends React.Component {
                      </div>
                  </Modal>
                  <Modal title="添加/编辑"
-                     key={Math.random() * Math.random()}
+                     key={this.state.addKey}
                      visible={this.state.visibleAdd}
                      onOk={this.handleOk.bind(this)}
                      onCancel={this.handleCancel.bind(this)}
@@ -323,16 +423,10 @@ class ServiceList extends React.Component {
                                 {...formI}
                                 label="休息室代码"
                             >
-                                {getFieldDecorator('code', {
-                                    rules: [{ message: '请输入休息室代码!' }],
+                                {getFieldDecorator('productCode', {
+                                    rules: [{ required: true, message: '请输入休息室代码!' }],
                                 })(
-                                    <AutoComplete
-                                        dataSource={loungeCode}
-                                        // onChange={this.handleWebsiteChange}
-                                        placeholder="请输入休息室代码"
-                                    >
-                                        <Input />
-                                    </AutoComplete>
+                                    <Input placeholder="请输入休息室代码" />
                                 )}
                             </FormItem>
                             <FormItem
@@ -340,27 +434,21 @@ class ServiceList extends React.Component {
                                 label="休息室名称"
                             >
                                 {getFieldDecorator('name', {
-                                    rules: [{ message: '请输入休息室名称!' }],
+                                    rules: [{ required: true, message: '请输入休息室名称!' }],
                                 })(
-                                    <AutoComplete
-                                        dataSource={loungeName}
-                                        // onChange={this.handleWebsiteChange}
-                                        placeholder="请输入休息室名称"
-                                    >
-                                        <Input />
-                                    </AutoComplete>
+                                    <Input placeholder="请输入休息室名称" />
                                 )}
                             </FormItem>
                             <FormItem
                                 {...formI}
                                 label="所属高铁站"
                             >
-                                {getFieldDecorator('station', {
-                                    rules: [{ message: '请输入高铁站!' }],
+                                {getFieldDecorator('trainStation', {
+                                    rules: [{ required: true, message: '请输入高铁站!' }],
                                 })(
                                     <AutoComplete
-                                        dataSource={highSpeedStation}
-                                        // onChange={this.handleWebsiteChange}
+                                        dataSource={this.state.trainStation}
+                                        onChange={this.handleStationChange}
                                         placeholder="请输入高铁站"
                                     >
                                         <Input />
@@ -372,12 +460,11 @@ class ServiceList extends React.Component {
                                 label={(
                                     <span>零售价格&nbsp;</span>
                                 )}
-                                hasFeedback
                             >
-                                {getFieldDecorator('employeeName', {
-                                    rules: [{ message: '请输入零售价格!', whitespace: true }],
+                                {getFieldDecorator('price', {
+                                    rules: [{ required: true, message: '请输入零售价格!', pattern: /\d+/g }],
                                 })(
-                                    <Input placeholder="请输入员工姓名" />
+                                    <Input placeholder="请输入零售价格" />
                                 )}
                            </FormItem>
                         </Form>

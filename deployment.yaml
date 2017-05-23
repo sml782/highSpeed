@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: HSR-web
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: HSR-web
+        type: web
+        image: nginx
+    spec:
+      containers:
+        - name: HSR-web
+          image: nginx:1.7.9
+          volumeMounts:
+          - mountPath: "/usr/share/nginx/html"
+            name: code
+            subPath: HSR-web
+          ports:
+            - containerPort: 80
+      volumes:
+        - name: code
+          persistentVolumeClaim:
+            claimName: code-claims
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: HSR-web
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: HSR-web
+    image: nginx
+    type: web

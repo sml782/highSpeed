@@ -7,33 +7,31 @@ import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData} from '../../utils/config';
 import DeleteDialog from '../DeleteDialog';//引入删除弹框
+import getTrainStation from '../../utils/station';//引入所属高铁站
 
 const FormItem = Form.Item;
 const Option = Select.Option;
 const Search = Input.Search;
 const AutoCompleteOption = AutoComplete.Option;
 const msg = '确认删除该员工吗?';
-const serveUrl = 'http://localhost:8888/'
 
 class ServiceList extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            productTypeData:[],
-            serveTypeData:[],
-            partListDate: [],
-            partListDateLength:null,
-            partListDateCurrent:1,
-            partListDatePageSize:10,
-            selectedRowKeys: [],
-            searchValue:'',
             menuListDate:[],
             menuIds:[],
             employeeList:[],
+            employeeListLength:0,
+            employeeCurrent:1,
+            employeePageSize:10,
+            employeeId:1,
+            selectedEm:{},
+            selectedRowKeys: [],
             visibleDel:false,
+            addKey:0,
             visibleAdd:false,
-            employeeId:null,
-            highspeedResult:[],
+            trainStationResult:[],
         }
     }
 
@@ -47,45 +45,55 @@ class ServiceList extends React.Component {
         for(var i = 0;i < 100;i++){
             data.push({
                 key:i,
-                name:`张${i}`,
-                phone:Math.floor(Math.random()*10000000000+13000000000),
-                onesSpeed:`杭州${i}`
+                employeeId:i,
+                name:['张三','李四'][Math.floor(Math.random()*2)],
+                sex:['0','1'][Math.floor(Math.random()*2)],
+                phone:Math.floor(Math.random()*18888888888+13000000000),
+                stationName:['杭州东站','杭州城站'][Math.floor(Math.random()*2)],
             })
         }
-        this.setState({partListDate:data})
+        this.setState({employeeList:data,employeeListLength:data.length})
     }
     componentDidMount=()=>{
-        $(".ant-breadcrumb-separator").html(">");
-        $(".ant-breadcrumb-separator").css({color:'#333'});
-        $.ajax({
-            type: "GET",
-            //url: serveUrl+"list",
-            url: serveUrl+"hsr-role/getEmployeeById?access_token="+ User.appendAccessToken().access_token,
-            success: function(data){
-                var employeeList = []
-                data.data.map((v,i)=>{
-                    employeeList.push({
-                        key:i,
-                        name:,
-                        phone:Math.floor(Math.random()*10000000000+13000000000),
-                        onesSpeed:`杭州${i}`
-                    })
-                })
-                _this.setState({
-                    partListDate: data.data.rows,
-                    partListDateLength:data.data.total
-                })
-            }
-        });
+        $(".ant-breadcrumb-separator").html(">")
+        $(".ant-breadcrumb-separator").css({color:'#333'})
+        const _this = this
+        //获取员工列表
+        // $.ajax({
+        //     type: "GET",
+        //     url: serveUrl+"/hsr-role/getEmployeeById?access_token="+ User.appendAccessToken().access_token,
+        //     success: function(data){
+        //         var employeeList = []
+        //         data.data.employee.map((v,i)=>{
+        //             employeeList.push({
+        //                 key:i,
+        //                 employeeId:v.employeeId,
+        //                 name:v.name,
+        //                 phone:v.phone,
+        //                 stationName:v.stationName,
+        //             })
+        //         })
+        //         _this.setState({
+        //             employeeList: data.data,
+        //             employeeListLength:data.data.length,
+        //         })
+        //     }
+        // })
     }
 
     componentDidUpdate=()=>{    
         $(".ant-table-tbody tr td").css({borderBottom:'none'});
         $("table").css({border:'1px solid #f0f0f0'});
+        
     }
-   handleSubmit =(e)=>{
-       console.log(e)
-       e.preventDefault()
+    handleSubmit =(e)=>{
+        console.log(e)
+        e.preventDefault()
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            if (!err) {
+              console.log(values);
+            }
+        });
     }
    
      getInitList(page,rows){
@@ -95,20 +103,20 @@ class ServiceList extends React.Component {
             if (!err) {
                 $.ajax({
                     type: "GET",
-                    //url: serveUrl+"list",
-                    url: serveUrl+"guest-employee/list?access_token="+ User.appendAccessToken().access_token,
-                    data:{
-                        page:page,
-                        rows:rows,
-                        name:values.institutionClientName
-                        },
+                    url: serveUrl+"/hsr-role/getEmployeeById?access_token="+ User.appendAccessToken().access_token,
+                    contentType: 'application/json;charset=utf-8',
+                    data:JSON.stringify({
+                            page:page,
+                            rows:rows,
+                            name:values.institutionClientName
+                        }),
                     success: function(data){
                         data.data.rows.map((v,index)=>{
                             v.key = v.employee_id
                         })
                         _this.setState({
-                            partListDate: data.data.rows,
-                            partListDateLength:data.data.total
+                            employeeList: data.data.rows,
+                            employeeListLength:data.data.total
                         })
                     }
                 });
@@ -116,67 +124,167 @@ class ServiceList extends React.Component {
         });
     }
 
+    //获取高铁站
+    handleStationChange = (value) => {
+        const _this = this
+        if(value !== ''){
+            setTimeout(() => {
+                getTrainStation(value,(station) => {
+                    console.log(station)
+                    const trainStation = station.map((s) => {
+                        return <AutoCompleteOption key={s.value}>{s.value}</AutoCompleteOption>;
+                    })
+                    _this.setState({ trainStation: trainStation})
+                })
+                
+
+                
+            },300)
+        }
+    }
+
     //删除弹框
     showModalDel = (record) => {
+        console.log(record.employeeId)
         this.setState({
             visibleDel: true,
-            //employeeId:record.employee_id
+            employeeId:record.employee_id
         });
     }
     //删除确认
     handleOkDel = () => {
-        this.setState({
-                visibleDel: false
-            });
-        // setTimeout(() => {
-        //     this.setState({
-        //         visibleDel: false
-        //     });
-        //     //删除协议
-        //     const _this = this;
-        //     $.ajax({
-        //         type: "POST",
-        //         contentType: 'application/json;charset=utf-8',
-        //         url: serveUrl + "guest-employee/delete?access_token="+User.appendAccessToken().access_token,
-        //         data: JSON.stringify({
-        //             data: [parseInt(_this.state.employeeId)]
-        //         }),
-        //         success: function (data) {
-        //             if(data.status == 200 ){
-        //                 if(data.data != null){
-        //                     message.error(data.data);
-        //                 }else{
-        //                     message.success(data.msg);
-        //                 }
-        //             }else{
-        //                 message.error(data.msg);
-        //             }
-        //             _this.getInitList(_this.state.partListDateCurrent,_this.state.partListDatePageSize)
-        //         }
-        //     });
-        // }, 1000);
+        const _this = this
+        $.ajax({
+            type: "POST",
+            contentType: 'application/json;charset=utf-8',
+            url: serveUrl + "/hsr-role/deleteEmployee?access_token="+User.appendAccessToken().access_token,
+            data: JSON.stringify({
+                data: [parseInt(_this.state.employeeId)]
+            }),
+            success: function (data) {
+                if(data.status == 200 ){
+                    if(data.data != null){
+                        message.error(data.data);
+                    }else{
+                        message.success(data.msg);
+                    }
+                }else{
+                    message.error(data.msg);
+                }
+                _this.setState({
+                    visibleDel: false
+                });
+                _this.getInitList(_this.state.employeeCurrent,_this.state.employeePageSize)
+            }
+        });
     }
     //删除取消
     handleCancelDel = () => {
-        this.setState({
-            visibleDel: false
-        });
+        this.setState({ visibleDel: false });
+
     }
-    //增加员工
+    //添加/修改员工
     addEmployeeBtn=(record)=>{
-        this.setState({visibleAdd:true})
+        this.setState({ visibleAdd: true,addKey:Math.random() * Math.random() })
+        const _this = this
+        if(!record.dispatchConfig){
+            console.log(record)
+            $.ajax({
+                type: "GET",
+                contentType: 'application/json;charset=utf-8',
+                url: serveUrl + "/hsr-role/deleteEmployee?access_token="+User.appendAccessToken().access_token,
+                data: JSON.stringify({
+                    data: [parseInt(record.employeeId)]
+                }),
+                success: function (data) {
+                    if(data.status == 200 ){
+                        if(data.data != null){
+                            message.error(data.data);
+                        }else{
+                            message.success(data.msg);
+                            _this.setState({ selectedEm: data.data})
+                            _this.props.form.setFieldsValue({
+                                name:data.data.name,
+                                phone:data.data.phone,
+                                sex:data.data.sex,
+                                stationName:data.data.stationName,
+                            })
+
+                        }
+                    }else{
+                        message.error(data.msg);
+                    }
+                }
+            });
+            
+        }else{
+            this.setState({ selectedEm: {} })
+        }
+        
     }
 
-    //添加/修改
+
+    //添加/修改确认
     handleOk(){
-        this.setState({visibleAdd:false})
+        const dtd = $.Deferred()
+        const _this = this;
+        var employeeList, arr = [], selectedEm
+        this.props.form.validateFields((err, values) => {
+            if(!err){
+                const setData = (dtd) => {
+                        console.log(values)
+                        employeeList = this.state.employeeList
+                        selectedEm = this.state.selectedEm
+                        arr = Object.keys(selectedEm)
+                        trainStation.map((v,i) => {
+                            if(v.value == values.trainStation){
+                                values.trainStationId = v.trainStationId
+                            }
+                        }) 
+                        selectedEm = $.extend(selectedEm,values)
+                        console.log(selectedEm)
+                        dtd.reject()
+                        return dtd
+                }
+                $.when(setData(dtd)).
+                    done(
+                        $.ajax({
+                            type: "POST",
+                            contentType: 'application/json;charset=utf-8',
+                            url: serveUrl + "/hsr-role/saveOrUpdateEmployee?access_token="+User.appendAccessToken().access_token,
+                            beforeSend:() => {
+                                console.log(arr)
+                            },
+                            data: JSON.stringify({
+                                    data:arr.length?product:values
+                                }),      
+                            success: function (data) {
+                                if(data.status == 200 ){
+                                    if(data.data != null){
+                                        message.error(data.data);
+                                    }else{
+                                        message.success(data.msg);
+                                    }
+                                }else{
+                                    message.error(data.msg);
+                                }
+                                _this.setState({ visibleAdd: false })
+                                _this.getInitList(_this.state.employeeCurrent,_this.state.employeePageSize)
+                                }
+                            })
+                    )
+                    
+                }
+            
+        })
+
     }
 
     //取消添加/修改
     handleCancel(){
         this.setState({visibleAdd:false})
+        this.props.form.resetFields()
     }
-    
 
     render() {
         const { getFieldDecorator } = this.props.form;
@@ -202,7 +310,7 @@ class ServiceList extends React.Component {
         }, {
             title: '所属高铁站',
             width: '20%',
-            dataIndex: 'onesSpeed',
+            dataIndex: 'stationName',
             render(text,record) {
                 return (
                         <div className="order">{text}</div>
@@ -222,15 +330,15 @@ class ServiceList extends React.Component {
         }];
 
        const pagination = {
-            total: this.state.partListDateLength,
+            total: this.state.employeeListLength,
             onShowSizeChange(current, pageSize) {
-                _this.state.partListDateCurrent = current;
-                _this.state.partListDatePageSize = pageSize;
-                _this.getInitList(_this.state.partListDateCurrent,_this.state.partListDatePageSize);
+                _this.state.employeeCurrent = current;
+                _this.state.employeePageSize = pageSize;
+                _this.getInitList(_this.state.employeeCurrent,_this.state.employeePageSize);
             },
             onChange(current) {
-                _this.state.partListDateCurrent = current;
-                _this.getInitList(_this.state.partListDateCurrent,_this.state.partListDatePageSize);
+                _this.state.employeeCurrent = current;
+                _this.getInitList(_this.state.employeeCurrent,_this.state.employeePageSize);
             },
 
       };
@@ -257,11 +365,6 @@ class ServiceList extends React.Component {
             },
         },
       };
-
-      const { highspeedResult } = this.state;
-      const highSpeedStation = highspeedResult.map((station) => {
-        return <AutoCompleteOption key={station}>{station}</AutoCompleteOption>;
-      });
        
         return (
             <div>
@@ -278,51 +381,27 @@ class ServiceList extends React.Component {
                     
                     <Row>
                         <Col>
-                            <button className="btn" onClick={this.addEmployeeBtn}>新增员工</button>
-                        </Col>
-                        <Col style={{marginLeft:200}}>
-                            <Form layout={'inline'}
-                                className="ant-advanced-search-form"
-                                onSubmit={this.getInitList.bind(this,this.state.partListDateCurrent,this.state.partListDatePageSize)}
-                            >
-                                <Row>
-                                    <Col span={10}>
-                                        <FormItem label="员工姓名:" hasFeedback>
-                                            {getFieldDecorator('institutionClientName', {
-                                            })(
-                                                <AutoComplete
-                                                    dataSource={this.state.AutoClientList}
-                                                    placeholder="请输入员工姓名"
-                                                    style={{width:170}}
-                                                />
-                                            )}
-                                        </FormItem>
-                                    </Col>
-                                    <Col span={4}>
-                                        <button className='btn-small' onClick={this.handleSearch}>查&nbsp;&nbsp;询</button>
-                                    </Col>
-                                </Row>
-                            </Form>
+                            <button className="btn" ref="addEmployee" onClick={this.addEmployeeBtn}>新增员工</button>
                         </Col>
                         
                         <div className="search-result-list" >
-                            <p style={{marginTop: 20}}>共搜索到{this.state.partListDateLength}条数据</p>
-                            <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={this.state.partListDate}  className=" serveTable"/>
+                            <p style={{marginTop: 20}}>共搜索到{this.state.employeeListLength}条数据</p>
+                            <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={this.state.employeeList}  className="serveTable"/>
                         </div>
                     </Row>
                  </div>
                  <Modal title="警告"
                      key={Math.random() * Math.random()}
                      visible={this.state.visibleDel}
-                     onOk={this.handleOkDel}
-                     onCancel={this.handleCancelDel}
+                     onOk={this.handleOkDel.bind(this)}
+                     onCancel={this.handleCancelDel.bind(this)}
                      >
                      <div>
                         <DeleteDialog msg={msg} />
                      </div>
                  </Modal>
                  <Modal title="添加/编辑"
-                     key={Math.random() * Math.random()}
+                     key={this.state.addKey}
                      visible={this.state.visibleAdd}
                      onOk={this.handleOk.bind(this)}
                      onCancel={this.handleCancel.bind(this)}
@@ -330,16 +409,26 @@ class ServiceList extends React.Component {
                      <div>
                         <Form onSubmit={this.handleSubmit}>
                             <FormItem
+                                label='员工姓名'
                                 {...formI}
-                                label={(
-                                    <span>员工姓名&nbsp;</span>
-                                )}
-                                hasFeedback
                             >
-                                {getFieldDecorator('employeeName', {
+                                {getFieldDecorator('name', {
                                     rules: [{ required: true, message: '请输入员工姓名!', whitespace: true }],
                                 })(
                                     <Input placeholder="请输入员工姓名" />
+                                )}
+                           </FormItem>
+                           <FormItem
+                                label="性别" 
+                                {...formI}
+                            >
+                                {getFieldDecorator('sex', {
+                                    rules: [{ required: true, message: '请选择!' }],
+                                })(
+                                    <Select placeholder="请选择">
+                                        <Option value="1">男</Option>
+                                        <Option value="0">女</Option>
+                                    </Select>
                                 )}
                            </FormItem>
                            <FormItem
@@ -356,15 +445,14 @@ class ServiceList extends React.Component {
                                 {...formI}
                                 label="所属高铁站"
                             >
-                                {getFieldDecorator('station', {
+                                {getFieldDecorator('stationName', {
                                     rules: [{ required: true, message: '请输入高铁站!' }],
                                 })(
                                     <AutoComplete
-                                        dataSource={highSpeedStation}
-                                        // onChange={this.handleWebsiteChange}
+                                        dataSource={this.state.trainStation}
+                                        onChange={this.handleStationChange}
                                         placeholder="请输入高铁站"
                                     >
-                                        <Input />
                                     </AutoComplete>
                                 )}
                             </FormItem>

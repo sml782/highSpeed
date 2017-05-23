@@ -12,8 +12,10 @@ import Chart from './routes/Chart';
 import Calendar from './routes/Calendar';
 import Follow from './routes/Follow';
 import Mofang from './routes/Mofang';
-import Login from './routes/Login';
 import Reg from './routes/Reg';
+
+//登录模块
+import Login from './routes/login/Login'
 
 //订单管理
 import Order from './routes/order/Order'
@@ -24,7 +26,12 @@ import ServiceBillings from './routes/serviceBillings/ServiceBillings'
 
 //系统管理
 import System from './routes/system/System'
-import AddPart from './routes/system/AddPart'
+//角色管理
+//import AddPart from './routes/part/AddPart'
+import AddPart from './routes/part/Addpart-1'
+//菜单管理
+//添加订单
+import AddMenu from './routes/menu/addMenu'
 
 //员工管理
 import EmployeeList from './routes/employee/EmployeeList'
@@ -39,12 +46,16 @@ export default (
     <Router history={hashHistory}>
         <Route path="/" component={SiderBar}>
             <IndexRoute component={Order} />
+
+            
+
             <Route path="order" component={Order} />
             <Route path="addAppointment" component={AddAppointment} />
             <Route path="serviceBillings" component={ServiceBillings} />
 
             <Route path="system" component={System} />
-            <Route path="addPart" component={AddPart} />
+            <Route path="addPart(/:roleId)" component={AddPart} />
+            <Route path="addMenu" component={AddMenu} />
 
             <Route path="employeeList" component={EmployeeList} />
 

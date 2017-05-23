@@ -1,6 +1,9 @@
 import React from 'react';
+import { hashHistory } from 'react-router';
 import { Link} from 'react-router'
 import { Menu, Icon, Switch } from 'antd';
+import { serveUrl, User, cacheData,getCookie} from '../utils/config';
+import $ from 'jquery';
 const SubMenu = Menu.SubMenu;
 
 const ACTIVE = { color: 'red' };
@@ -10,7 +13,10 @@ class SiderBar extends React.Component {
         super(props)
         this.state = {
             current: '1',
-            username: '',
+            roleId: '',
+            username:undefined,
+            status:true,
+            siderBar:[],
             totalTitle:'订单管理',
         }
     }
@@ -23,11 +29,28 @@ class SiderBar extends React.Component {
 
     componentWillMount() {
         
-        if(this.isLogin()){
-            console.log('已登录');
-        }else{
-            console.log('未登录');
-        }
+        // if (User.isLogin()) {
+            
+        // } else {
+        //     hashHistory.push('/login');
+        // }
+        const _this = this
+        $.ajax({
+            type: "GET",
+            url: serveUrl+"/hsr-role/getMenuByRoleId",
+            beforeSend:() => {
+                    _this.setState({
+                        username:cacheData.get('username'),
+                        roleId:cacheData.get('roleId'), 
+                    })
+                },
+            data:{roleId:_this.state.roleId},
+            success: function(data){
+                _this.setState({
+                    siderBar:data.data
+                })
+            }
+        })
     }
 
     isLogin(){
