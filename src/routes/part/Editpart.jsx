@@ -1,4 +1,4 @@
-import './part.less'
+import './part.less';
 import React from 'react';
 import { hashHistory } from 'react-router';
 import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Tree,Modal,TreeSelect} from 'antd';
@@ -6,14 +6,14 @@ import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData, access_token } from '../../utils/config';
 import DeleteDialog from '../DeleteDialog';//引入删除弹框
-import AddPartLounge from './AddPartLounge'
+import AddPartLounge from './AddPartLounge';
 
-const SHOW_PARENT = TreeSelect.SHOW_PARENT;
 const FormItem = Form.Item;
 const Option = Select.Option;
 const Search = Input.Search;
 const msg = '是否删除?';
 const TreeNode = Tree.TreeNode;
+const SHOW_PARENT = TreeSelect.SHOW_PARENT;
 const url = 'http://192.168.0.147:8888/';
 
 function removeByValue(arr, val) {
@@ -25,7 +25,7 @@ function removeByValue(arr, val) {
   }
 }
 
-class ServiceList extends React.Component {
+class Editpart extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -66,12 +66,44 @@ class ServiceList extends React.Component {
         // } else{
         //     hashHistory.push('/login');
         // }
-        this.getInit()
+        this.getInit();
     }
     componentDidMount=()=>{
         $(".ant-modal-footer").hide();
         $(".ant-breadcrumb-separator").html(">");
         $(".ant-breadcrumb-separator").css({color:'#333'});
+
+        //获取角色详情
+        const _this = this;
+        $.ajax({
+            type: "GET",
+            url: url + "hsr-role/getRoleById",
+            data: { access_token: User.appendAccessToken().access_token, roleId: _this.props.params.roleId },
+            success: function(data) {
+                if (data.status == 200) {
+                    if(data.data.menuIdList){
+                        data.data.menuIdList.map(k=>{
+                            _this.state.value.push(k.toString());
+                        });
+                    }
+                    if(data.data.productList){
+                        data.data.productList.map(k=>{
+                            k.key = k.productId;
+                            _this.state.loungeIdList.push(k.productId);
+                        })
+                    }
+                    console.log(_this.state.value);
+                    _this.setState({
+                        value:_this.state.value,
+                        productList:data.data.productList
+                    });
+                    _this.props.form.setFieldsValue({
+                        name:data.data.name,
+                        account:data.data.account,
+                    })
+                }
+            }
+        });
     }
     componentDidUpdate=()=>{
         $(".ant-table-tbody tr td").css({borderBottom:'none'});
@@ -161,8 +193,8 @@ class ServiceList extends React.Component {
     //保存高铁休息室
     addProduct=(data)=>{
         this.state.productList.push({
-            stationName:data[0].stationName,
-            lounge:data[0].lounge,
+            trainStation:data[0].stationName,
+            name:data[0].lounge,
             productId:data[0].productId
         });
         this.state.loungeIdList.push(data[0].productId);
@@ -173,7 +205,15 @@ class ServiceList extends React.Component {
         });
     }
 
-   handleSubmit =(e)=>{
+    handleReset=()=>{
+        hashHistory.push('/system');
+    }
+    //已选菜单
+    onChange = (value) => {
+        this.setState({ value: value });
+    }
+
+    handleSubmit =(e)=>{
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
             if (!err) {
@@ -184,12 +224,14 @@ class ServiceList extends React.Component {
                         account: values.account,
                         productIdList:_this.state.loungeIdList,
                         menuIdList:_this.state.value,
+                        roleId: _this.props.params.roleId
                     }]
                 };
                 $.ajax({
                     type: "POST",
                     contentType:'application/json;charset=utf-8',
-                    url: url+"hsr-role/saveOrUpdateRole?access_token="+User.appendAccessToken().access_token,
+                    url: serveUrl+"/hsr-role/saveOrUpdateRole?access_token="+ User.appendAccessToken().access_token,
+                    //url: serveUrl+"/hsr-role/saveOrUpdateRole?access_token="+ access_token,
                     data: JSON.stringify(formData),
                     success: function(data){
                         if(data.status == 200){
@@ -205,13 +247,6 @@ class ServiceList extends React.Component {
         });
     }
 
-    handleReset=()=>{
-        hashHistory.push('/system');
-    }
-    //已选菜单
-    onChange = (value) => {
-        this.setState({ value: value });
-    }
 
     render() {
         const { getFieldDecorator } = this.props.form;
@@ -220,37 +255,35 @@ class ServiceList extends React.Component {
             wrapperCol: { span: 19 },
         };
         const _this = this;
-        const columns = [
-            {
-                title: '高铁站',
-                width: '25%',
-                dataIndex: 'stationName',
-                render(text,record) {
-                    return (
-                            <div className="order">{text}</div>
-                            )
-                }
-            }, {
-                title: '关联休息室',
-                width: '55%',
-                dataIndex: 'lounge',
-                render(text,record) {
-                    return (
-                            <div className="order">{text}</div>
-                            )
-                }
-            },{
-                title: '操作',
-                width: '20%',
-                render(text,record) {
-                    return (
-                            <div className="order">
-                                <a onClick={_this.showModalDel.bind(_this,record)}  style={{color:'#4778c7'}}>删除</a>
-                            </div>
-                            )
-                }
+        const columns = [{
+            title: '高铁站',
+            width: '25%',
+            dataIndex: 'trainStation',
+            render(text,record) {
+                return (
+                        <div className="order">{text}</div>
+                        )
             }
-        ];   
+        }, {
+            title: '关联休息室',
+            width: '55%',
+            dataIndex: 'name',
+            render(text,record) {
+                return (
+                        <div className="order">{text}</div>
+                        )
+            }
+        },{
+            title: '操作',
+            width: '20%',
+            render(text,record) {
+                return (
+                        <div className="order">
+                            <a onClick={_this.showModalDel.bind(_this,record)}  style={{color:'#4778c7'}}>删除</a>
+                        </div>
+                        )
+            }
+        }];   
 
         const tProps = {
             treeData:_this.state.menuListDate,
@@ -264,83 +297,80 @@ class ServiceList extends React.Component {
                 width: 300,
             },
         };
-
+     
         return (
             <div>
                 <div className="breadcrumb-box">
                     <div className="top-bar"></div>
                     <div className="breadcrumb">
                         <Breadcrumb>
-                            <Breadcrumb.Item>新增角色</Breadcrumb.Item>
+                            <Breadcrumb.Item>新增角色</Breadcrumb.Item>tem>
                         </Breadcrumb>
                     </div>
                 </div>
 
-                 <div className="box">                
+                 <div className="box">
+
+                    
+
+
                     <Form horizontal style={{marginTop:44}}>
                         <Row>
-                            <Col span={12}>
-                            <FormItem label="角色名称" {...formItemLayout} hasFeedback required style={{marginLeft:-20}} >
-
+                            <FormItem label="角色名称" {...formItemLayout} hasFeedback required >
                                 {getFieldDecorator('name', {
                                     rules: [{ required: true, message: '请输入角色名称!' }],
+                                    
                                 })(
                                     <Input  placeholder="请输入角色名称" style={{width:358}}/>
+                                    
                                 )}
                             </FormItem>
-                            </Col>
-                        <Col span={12}>
-                            <FormItem label="登录账号" {...formItemLayout} hasFeedback required style={{marginLeft:-20}} >
+                        </Row>
 
+                        <Row>
+                            <FormItem label="登录账号" {...formItemLayout} hasFeedback required >
                                 {getFieldDecorator('account', {
                                     rules: [{ required: true, message: '请输入登录账号!' }],
+                                    
                                 })(
                                     <Input  placeholder="请输入登录账号" style={{width:358}}/>
+                                    
                                 )}
                             </FormItem>
-                        </Col>
-                        <Col span={12} style={{marginTop:20}}>
-                            <FormItem labelInValue label="角色描述" {...formItemLayout} required style={{marginLeft:-20}}>
-                                {getFieldDecorator('description', {
-                                    rules: [{ required: true, message: '请输入角色名称!' }],
-                                })(
-                                    <Input  placeholder="请输入角色名称" style={{width:358}}  className='required'/>
-                                )}
-                            </FormItem>
-                        </Col>
-                        <Col span={12} style={{marginTop:20}}>
-                        <FormItem labelInValue label="菜单权限" {...formItemLayout} hasFeedback style={{marginLeft:-20}}>
+                        </Row>
+
+                        <FormItem label="菜单权限" {...formItemLayout} hasFeedback >
                             {getFieldDecorator('menuListName', {
+                                initialValue:this.state.value
                             })(
                                 <TreeSelect {...tProps} />
                             )}
                         </FormItem>
-                        </Col>
-                        <Col span={24}>
-                        <div className="station-lounges" style={{marginTop:20}}>
-                            <span  onClick={this.showModalAdd} className='btn-add' style={{display:'inline-block',marginLeft:'87%'}}>添加高铁休息室</span>
-                            <Table style={{marginBottom:20,width:'100%',textAlign:"center",marginTop:20}} columns={columns} dataSource={this.state.productList}  className="lounges"/>
 
+                        <div className="station-lounges">
+                            <Button onClick={_this.showModalAdd} type="primary" size="large">添加高铁休息室</Button>
+                            <Table style={{marginBottom:20,width:600,textAlign:"center"}} columns={columns} dataSource={this.state.productList}  className="lounges"/>
                         </div>
-                        </Col>
-                        <Col span={24} style={{ textAlign: 'center'}} className="mb44">
-                            <FormItem>
-                                <span className='btn-search' style={{display:'inline-block'}} onClick={this.handleSubmit}>保存</span>
-                                &nbsp;&nbsp;&nbsp;
-                                <span className='btn-cancel' style={{display:'inline-block'}} onClick={this.handleReset}>取消</span>
-                            </FormItem>
-                        </Col>
-                        </Row>
-                    </Form>
 
-                    <Modal title="添加"
-                        key={Math.random()*Math.random()}
+                        <Row style={{marginTop:50 }}>
+                            <Col span={24} style={{ textAlign: 'center'}} className="mb44">
+                                <FormItem>
+                                    <span className='btn-search' style={{display:'inline-block'}} onClick={this.handleSubmit}>保存</span>
+                                    &nbsp;&nbsp;&nbsp;
+                                    <span className='btn-cancel' style={{display:'inline-block'}} onClick={this.handleReset}>取消</span>
+                                </FormItem>
+                            </Col>
+                        </Row>
+                        
+                    </Form>
+                    <Modal title="编辑"
+                        key={this.state.addKey}
                         visible={this.state.visibleAdd}
                         onOk={this.handleOkAdd.bind(this)}
                         onCancel={this.handleCancelAdd.bind(this)}
                     >
                         <div>
-                            <AddPartLounge addProduct={this.addProduct}/>
+                            <AddPartLounge addProduct={this.addProduct} />
                         </div>
                     </Modal>
 
@@ -361,6 +391,6 @@ class ServiceList extends React.Component {
     }
 }
 
-ServiceList = Form.create()(ServiceList);
+Editpart = Form.create()(Editpart);
 
-export default ServiceList;
+export default Editpart;

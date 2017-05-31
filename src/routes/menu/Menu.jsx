@@ -101,8 +101,8 @@ class ServiceList extends React.Component {
         const _this = this
         $.ajax({
             type: "GET",
-            //url: serveUrl+'/hsr-role/getMenuByRoleId?access_token='+ User.appendAccessToken().access_token,
-            url: serveUrl + '/hsr-role/getMenuByRoleId?access_token=' + access_token,
+            url: serveUrl+'/hsr-role/getMenuByRoleId?access_token='+ User.appendAccessToken().access_token,
+            //url: serveUrl + '/hsr-role/getMenuByRoleId?access_token=' + access_token,
             contentType: 'application/json;charset=utf-8',
             data:{
                 roleId:1
@@ -160,8 +160,8 @@ class ServiceList extends React.Component {
             $.ajax({
                 type: "POST",
                 contentType: 'application/json;charset=utf-8',
-                //url: serveUrl + "/hsr-role/deleteMenus?access_token="+User.appendAccessToken().access_token,
-                url: serveUrl + "/hsr-role/deleteMenus?access_token="+'8S9jRHT9vSheueiQQPzEgOqHnI9H4CVK9nYXpad9',
+                url: serveUrl + "/hsr-role/deleteMenus?access_token="+User.appendAccessToken().access_token,
+                //url: serveUrl + "/hsr-role/deleteMenus?access_token="+'8S9jRHT9vSheueiQQPzEgOqHnI9H4CVK9nYXpad9',
                 data: JSON.stringify({
                     data: [parseInt(_this.state.menuId)]
                 }),
@@ -185,6 +185,9 @@ class ServiceList extends React.Component {
         this.setState({
             visibleDel: false
         });
+    }
+    showTotal(total) {
+      return `共 ${total} 条`;
     }
  
     render() {
@@ -233,25 +236,18 @@ class ServiceList extends React.Component {
             render(text,record) {
                 return (
                         <div className="order">
-                            <a onClick={_this.revise.bind(_this,text)} style={{marginRight:10,color:'#4778c7'}}>修改</a>
-                            <a onClick={_this.showModalDel.bind(_this,record)} style={{color:'#4778c7'}}>删除</a>
+                            <span onClick={_this.revise.bind(_this,record)} className='listRefresh'>编辑</span>
+                            <Popconfirm title="确认删除?" onConfirm={() => _this.showModalDel.bind(_this,record)}>
+                            <span  style={{marginLeft:4}} className='listCancel'>删除</span>
+                            </Popconfirm>
                         </div>
                         )
             }
         }]
-         const rowSelection = {
-            // onChange: (selectedRowKeys, selectedRows) => {
-            //     console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-            // },
-            onSelect: (record, selected, selectedRows) => {
-       //         console.log(record, selected, selectedRows);
-                selected='false'
-            },
-            // onSelectAll: (selected, selectedRows, changeRows) => {
-            //     console.log(selected, selectedRows, changeRows);
-            //     selected = true;
-            // },
-        };
+        const pagination = {
+        size:'small',
+        showTotal:this.showTotal 
+        }
         return (
             <div>
                 <Modal title="修改菜单"
@@ -266,9 +262,9 @@ class ServiceList extends React.Component {
                  </Modal>
 
                  <div className="box">
-                    <button className="btn" style={{marginTop:20}} onClick={this.addMenuBtn}>新增菜单</button>
+                    <div className='btn-add' style={{marginLeft:'87%'}} onClick={this.addMenuBtn}><span>新增菜单</span><img src={require('../../assets/images/add.png')} className='addImg'/></div>    
                     <div className="search-result-list" >
-                        <Table style={{marginTop:20}} columns={columns} rowKey="menuId" dataSource={_this.state.menuListDate} className="serveTable"/>
+                        <Table style={{marginTop:20}} pagination={pagination} columns={columns} rowKey="menuId" dataSource={_this.state.menuListDate} className="serveTable"/>
                     </div>
                  </div>
                  <Modal title="警告"

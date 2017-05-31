@@ -4,7 +4,7 @@ import { hashHistory } from 'react-router';
 import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Menu } from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
-import { serveUrl, User, cacheData} from '../../utils/config';
+import { serveUrl, User, cacheData, access_token} from '../../utils/config';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -77,8 +77,8 @@ class AddMenu extends React.Component {
         const _this = this
         $.ajax({
             type: "GET",
-            //url: serveUrl+'/hsr-role/getMenuByRoleId?access_token='+ User.appendAccessToken().access_token,
-            url: serveUrl+'/hsr-role/getMenuByRoleId?access_token='+ access_token,
+            url: serveUrl+'/hsr-role/getMenuByRoleId?access_token='+ User.appendAccessToken().access_token,
+            //url: serveUrl+'/hsr-role/getMenuByRoleId?access_token='+ access_token,
             data:{airportCode:'LJG',roleId:1},
             success: function(data){
                 _this.setState({
@@ -110,12 +110,13 @@ class AddMenu extends React.Component {
                 $.ajax({
                     type: "POST",
                     contentType:'application/json;charset=utf-8',
-                    //url: serveUrl+'/hsr-role/addMenu?access_token='+User.appendAccessToken().access_token,
-                    url: serveUrl+'/hsr-role/addMenu?access_token='+access_token,
+                    url: serveUrl+'/hsr-role/addMenu?access_token='+User.appendAccessToken().access_token,
+                   // url: serveUrl+'/hsr-role/addMenu?access_token='+access_token,
                     data: JSON.stringify(formData),
                     success: function(data){
                         if(data.status == 200){
                             message.success(data.msg);
+                            hashHistory.push('system')
                         }
                         else if(data.status == 500){
                             message.error('后台错误');
@@ -130,7 +131,7 @@ class AddMenu extends React.Component {
 
     handleReset=()=>{
         this.props.form.resetFields();
-        hashHistory.push('reviseMenu');
+        hashHistory.push('system');
     }
     recursion(dataSource) {
         return (
@@ -161,23 +162,16 @@ class AddMenu extends React.Component {
                     <div className="top-bar"></div>
                     <div className="breadcrumb">
                         <Breadcrumb>
-                            <Breadcrumb.Item><Link to='/system' >菜单管理</Link></Breadcrumb.Item>
                             <Breadcrumb.Item>新增菜单</Breadcrumb.Item>
                         </Breadcrumb>
                     </div>
                 </div>
 
                  <div className="box">
-                    <ul className="tit">
-                        <li>
-                            <a href="javascript:;" className="active">新增菜单</a>
-                        </li>
-
-                    </ul>
                      <Menu
                         onClick={this.handleClick}
                         className='menuLeft'
-                        style={{ width: 185,marginTop:44,marginLeft:14,float:'left'}}
+                        style={{ width: 185,marginTop:10,marginLeft:14,float:'left'}}
                         mode="inline"
                         onOpenChange={this.onOpenChange}
                         selectedKeys={[this.state.current]}
@@ -185,15 +179,19 @@ class AddMenu extends React.Component {
                         {this.recursion(this.state.siderBar1)}
                     </Menu>
                             
-                    <Form horizontal style={{marginTop:44,marginLeft:40,float:'left'}}>
-                        <FormItem label="菜单名称" {...formItemLayout} hasFeedback   >
-                            {getFieldDecorator('name', {
-                                 rules: [{ required: true,message: '请输入菜单名称!' }],
-                            })(
-                                <Input   style={{width:358}}  className='required'/>
-                                
-                            )}
-                        </FormItem>
+                    <Form horizontal style={{marginLeft:200}}>
+                        <Row>
+                            <Col span={12}>
+                                <FormItem label="菜单名称" {...formItemLayout} hasFeedback   >
+                                    {getFieldDecorator('name', {
+                                        rules: [{ required: true,message: '请输入菜单名称!' }],
+                                    })(
+                                        <Input   style={{width:358}}  className='required'/>
+                                        
+                                    )}
+                                </FormItem>
+                            </Col>
+                        <Col span={12}>
                         <FormItem label="菜单链接" {...formItemLayout} hasFeedback   >
                             {getFieldDecorator('url', {
                                  rules: [{ required: true,message: '请输入菜单链接!'  }],
@@ -202,6 +200,8 @@ class AddMenu extends React.Component {
                                 
                             )}
                         </FormItem>
+                        </Col>
+                        <Col span={12}>
                         <FormItem label="菜单排序" {...formItemLayout} hasFeedback   >
                             {getFieldDecorator('position', {
                                  rules: [{ required: true,message: '请输入菜单排序!'  }],
@@ -210,6 +210,8 @@ class AddMenu extends React.Component {
                                 
                             )}
                         </FormItem>
+                        </Col>
+                        <Col span={12}>
                         <FormItem label="菜单图标" {...formItemLayout} hasFeedback   >
                             {getFieldDecorator('type', {
                             })(
@@ -217,12 +219,13 @@ class AddMenu extends React.Component {
                                 
                             )}
                         </FormItem>
-
-                        <Row style={{marginTop:50}}>
-                            <Col span={12} offset={10}>
+                        </Col>
+                        </Row>
+                        <Row>
+                            <Col span={12} style={{marginLeft:200,marginTop:-50}}>
                                 <FormItem >
-                                    <button className='btn-small' onClick={this.handleSubmit}>保存</button>
-                                    <button className='btn-small'  onClick={this.handleReset} style={{marginLeft:20}}>取消</button>
+                                    <button className='btn-search' onClick={this.handleSubmit}>保存</button>
+                                    <button className='btn-add'  onClick={this.handleReset} style={{marginLeft:20}}>取消</button>
                                 </FormItem>
                             </Col>
                         </Row>

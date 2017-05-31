@@ -15,10 +15,7 @@ class Passenger extends React.Component {
     constructor (props) {
         super(props);
         this.state = {
-            formLayout: 'inline',
-            highSpeedNo:[],
-            entrance:[],
-            retiringRoom:[],
+            
         }
     }
 
@@ -28,60 +25,121 @@ class Passenger extends React.Component {
 
     componentDidMount () {
         //TODO AJAX
-
+        $('.addp').parent().parent().parent().next('.ant-modal-footer').remove()
+        const values = this.props.values
+        if(values.travellerName){
+             this.props.form.setFieldsValue({
+                travellerName:values.travellerName,
+                phoneNumber:values.phoneNumber,
+                seatNum:values.seatNum,
+                thirdPartCode:values.thirdPartCode,
+            })
+        }
+       
     }
 
     componentWillUpdate () {
 
     }
 
+
+
     onchange () {
 
     }
 
+    //增加
+    addPassenger = () => {
+        const _this = this
+        var values
+        this.props.form.validateFields((err, value) => {
+            if(!err){
+                values = value
+            }
+        })
+        this.props.add(()=>{
+            return values
+        })
+        
+    }
+    //取消添加
+    addCancel = () => {
+        this.props.form.resetFields()
+        this.props.hide(()=>{
+            return false
+        })
+    }
+
+    handleSubmit = (e) => {
+        e.preventDefault()
+    }
+
     render(){
+        const _this = this
         const { getFieldDecorator } = this.props.form;
 
         return (
             <div className='passenger'>
-                <Row style={{padding:'20px'}}>
-                    <Col span={8}>
-                        <FormItem
-                            label="旅客姓名" 
-                        >
-                            {getFieldDecorator('passengerName', {
-                                rules: [{
-                                required: true,message: '请输入旅客姓名!',
-                                }],
-                            })(
-                                <Input />
-                            )}
-                        </FormItem>
-                    </Col>
-                    <Col span={8}>
-                        <FormItem
-                            label="手机号" 
-                        >
-                            <Input />
-                        </FormItem>
-                    </Col>
-                </Row>
-                <Row style={{padding:'0 20px 10px'}}>
-                    <Col span={8}>
-                        <FormItem
-                            label="座位号" 
-                        >
-                            <Input />
-                        </FormItem>
-                    </Col>
-                    <Col span={8}>
-                        <FormItem
-                            label="第三方卡号" 
-                        >
-                            <Input />
-                        </FormItem>
-                    </Col>
-                </Row>
+                <Form layout={'inline'} onSubmit={_this.handleSubmit.bind(_this)}>
+       
+                            <FormItem
+                                label="旅客姓名"
+                                style={{ margin:'10px 0px'}} 
+                            >
+                                {getFieldDecorator('travellerName', {
+                                    rules: [{
+                                        required: true,message: '请输入旅客姓名!',
+                                    }],
+                                })(
+                                    <Input />
+                                )}
+                            </FormItem>
+                       
+                            <FormItem
+                                label="手机号" 
+                                style={{ margin:'10px 0px'}} 
+                            >
+                                {getFieldDecorator('phoneNumber', {
+                                    rules: [{
+                                        message: '请输入手机号!',
+                                    }],
+                                })(
+                                    <Input />
+                                )}
+                            </FormItem>
+                 
+                            <FormItem
+                                label="座位号" 
+                                style={{ margin:'10px 0px'}} 
+                            >
+                                {getFieldDecorator('seatNum', {
+                                    rules: [{
+                                        message: '请输入座位号!',
+                                    }],
+                                })(
+                                    <Input />
+                                )}
+                            </FormItem>
+                      
+                            <FormItem
+                                label="第三方卡号" 
+                                style={{ margin:'10px 0px'}} 
+                            >
+                                {getFieldDecorator('thirdPartCode', {
+                                    rules: [{
+                                        message: '请输入第三方卡号!',
+                                    }],
+                                })(
+                                    <Input />
+                                )}
+                            </FormItem>
+            
+                    <div className="ant-modal-footer addp">
+                        <button type="button" className="ant-btn ant-btn-lg" onClick={_this.addCancel.bind(_this)}><span>取 消</span></button>
+                        <button type="button" className="ant-btn ant-btn-primary ant-btn-lg" onClick={_this.addPassenger.bind(_this)}><span>确 定</span></button>
+                    </div>
+                </Form>
+                
             </div>
             
         )

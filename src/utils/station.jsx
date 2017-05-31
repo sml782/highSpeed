@@ -1,8 +1,11 @@
 import $ from 'jquery';
+import { serveUrl, User, cacheData, access_token} from './config';
+
 function getTrainStation (value,callback) {
     $.ajax({
         type: "GET",
-        url: 'http://192.168.0.147:8888/hsr-order/getTrainStationDropdownList?access_token=gR635UXIUIqSTAmsjmfZi1jrcDn1g12Yb9ezWTCR',
+        //url: serveUrl + '/hsr-order/getTrainStationDropdownList?access_token='+User.appendAccessToken().access_token,
+        url:'http://192.168.0.135:8888/hsr-order/getTrainStationDropdownList?access_token='+User.appendAccessToken().access_token,
         data:{name:value},
         success:function(data){
             if(data.status == 200 && data.data.length !== 0){

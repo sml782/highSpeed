@@ -20,22 +20,27 @@ class AddAppointment extends React.Component {
     constructor (props) {
         super(props);
         this.state = {
-            addKey:0,
-            changeKey:0,
+            updateInfo:{},
+            updateKey:0,
+            changeKey:1,
             clientName:[],
             clientList:[],
             train:{},
             placeList:[],
             startPlaceList:[],
             destinationList:[],
+            selectStartPlace:undefined,
             product:[],
             productList:[],
             visibleDel:false,
             visibleAdd:false,
             visibleSelect:false,
-            passengerKey:0,
+            passengerKey:15,
+            updatePassengerKey:20,
             passengerList:[],
+            updatePassengerList:[],
             selectPassenger:{},
+            register:{},
             registerName:[],
             registerList:[],
         }
@@ -48,7 +53,83 @@ class AddAppointment extends React.Component {
 
     componentDidMount () {
         //TODO AJAX
+        const _this = this
         $('.type').hide()
+        const orderId = this.props.params.orderId
+        console.log(orderId)
+        $.ajax({
+            type: "GET",
+            //url: serveUrl+'/hsr-order/getOrderById?access_token=' + User.appendAccessToken().access_token,
+            url: 'http://192.168.0.135:8888' + "/hsr-order/getOrderById?access_token="+User.appendAccessToken().access_token,
+            data: {
+                orderId:orderId
+            },
+            success: function (data) {
+                console.log(data)
+                if(data.status == 200 ){
+                    if(data.data != null){
+                        //Message.success(data.msg);
+                        const register = data.data.register
+                        _this.props.form.setFieldsValue({
+                            clientName:data.data.clientName,
+                            trainTime: moment(data.data.train.trainTime,'YYYY-MM-DD'),
+                            startTime: moment(data.data.train.startTime,'YYYY-MM-DD HH:mm'),
+                            checkTime: moment(data.data.train.checkTime,'YYYY-MM-DD HH:mm'),
+                            trainCode:data.data.train.trainCode,
+                            startPlace:data.data.train.startPlace,
+                            destinationPlace:data.data.train.destinationPlace,
+                            ticketBarrier:data.data.train.ticketBarrier,
+                            productName:data.data.productName,
+                            travellerComeTime: moment(data.data.travellerComeTime,'YYYY-MM-DD HH:mm'),
+                            travellerLeaveTime: moment(data.data.travellerLeaveTime,'YYYY-MM-DD HH:mm'),
+                            travellerNum:data.data.travellerNum,
+                            isCharge:data.data.isCharge?'是':'否',
+                            type:data.data.type?data.data.type:'',
+                            price:data.data.price,
+                        })
+                        data.data.travellerList.map((v,i) => {
+                            v.key = v.travellerId
+                        })
+                        _this.setState({
+                            updateInfo:data.data,
+                            passengerList:data.data.travellerList,
+                        })
+                        _this.trainChange.call(_this,data.data.train.trainTime,data.data.train.trainCode,data.data.train.startPlace)
+                        $.ajax({
+                            type: "GET",
+                            //url: serveUrl+'/hsr-role/getEmployeeById?access_token=' + User.appendAccessToken().access_token,
+                            url: 'http://192.168.0.135:8888' + "/hsr-role/getEmployeeById?access_token="+User.appendAccessToken().access_token,
+                            data: {
+                                employeeId:register
+                            },
+                            success: function (data) {
+                                console.log(data)
+                                if(data.status == 200 ){
+                                    if(data.data != null){
+                                        //Message.success(data.msg);
+                                        _this.props.form.setFieldsValue({
+                                            register:data.data.name
+                                        })
+                                        _this.setState({
+                                            register:data.data
+                                        })
+                                      }else{
+                                        Message.error(data.msg);
+                                    }
+                                }else{
+                                    Message.error(data.msg);
+                                }
+                            },
+                        })
+                    }else{
+                        Message.error(data.msg);
+                    }
+                }else{
+                    Message.error(data.msg);
+                }
+                
+            }
+        });
     }
 
     componentWillUpdate () {
@@ -69,6 +150,7 @@ class AddAppointment extends React.Component {
         }
     }
 
+
     //删除旅客Modal
     delPassModal = (record) => {
         console.log(record)
@@ -78,13 +160,15 @@ class AddAppointment extends React.Component {
     delPassOk = () => {
         const selectPassenger = this.state.selectPassenger
         const passengerList = this.state.passengerList
+        const updatePassengerList = this.state.updatePassengerList
         passengerList.map((v,i)=>{
-            if(v.key == selectPassenger.key){
+            if(v.travellerName == selectPassenger.travellerName){
                 passengerList.splice(i,1)
             }
         })
         this.setState({visibleDel:false,passengerList:passengerList,selectPassenger:{}})
         console.log(this.state.passengerList)
+        console.log(this.state.updatePassengerList)
     }
     //删除取消
     delPassCancle = () => {
@@ -94,7 +178,7 @@ class AddAppointment extends React.Component {
     //增加旅客Modal
     addPassModal = (record) => {
         console.log(record)
-        this.setState({addKey:Math.random()*Math.random(),visibleAdd:true,selectPassenger:record})
+        this.setState({updateKey:Math.random()*Math.random(),visibleAdd:true,selectPassenger:record})
     }
 
     //确认增加旅客
@@ -102,10 +186,12 @@ class AddAppointment extends React.Component {
         const values = cb()
         const selectPassenger = this.state.selectPassenger
         const passengerList = this.state.passengerList
+        console.log(selectPassenger)
         if(selectPassenger.key == undefined){
             this.setState({passengerKey:++this.state.passengerKey})
             values.key = this.state.passengerKey
             passengerList.push(values)
+            
         }else{
             passengerList.map((v,i) => {
                 if(v.key == selectPassenger.key){
@@ -117,7 +203,8 @@ class AddAppointment extends React.Component {
                 }
             })
         }
-        this.setState({visibleAdd:false, passengerList:passengerList,selectPassenger:{}})
+        console.log(passengerList)
+        this.setState({  visibleAdd:false, passengerList:passengerList,selectPassenger:{}})
     }
     //取消增加旅客
     addPassengerCancel = (cb) => {
@@ -134,7 +221,7 @@ class AddAppointment extends React.Component {
         console.log(value)
         $.ajax({
             type: "GET",
-            url: serveUrl+'/hsr-client/getClientDropdownList?access_token=' + User.appendAccessToken().access_token,
+            url: 'http://192.168.0.147:8888'+'/hsr-client/getClientDropdownList?access_token=' + User.appendAccessToken().access_token,
             //url: serveUrl + "/hsr-client/getClientDropdownList?access_token="+access_token,
             data: {
                 name:value
@@ -165,16 +252,19 @@ class AddAppointment extends React.Component {
     }
 
     //请求高铁车次
-    trainChange = () => {
+    trainChange = (trainTime,trainCode,startPlace) => {
         const _this = this
         this.props.form.validateFields((err,val) => {
             if(!err){
                 console.log(val)
                 $.ajax({
                     type: "GET",
-                    //url: serveUrl+'/hsr-order/getTrainInfo?access_token=' + User.appendAccessToken().access_token,
-                    url: 'http://192.168.0.135:8888' + "/hsr-order/getTrainInfo?access_token="+User.appendAccessToken().access_token,
-                    data: {
+                    url: serveUrl+'/hsr-order/getTrainInfo?access_token=' + User.appendAccessToken().access_token,
+                    //url: serveUrl + "/hsr-order/getTrainInfo?access_token="+access_token,
+                    data: trainTime?{
+                        trainTime:moment(trainTime,'YYYY-MM-DD').format('YYYY-MM-DD'),
+                        trainCode:trainCode
+                    }:{
                         trainTime: moment(val.trainTime,'YYYY-MM-DD').format('YYYY-MM-DD'),
                         trainCode: val.trainCode,
                     },
@@ -192,6 +282,9 @@ class AddAppointment extends React.Component {
                                     startPlaceList:place.slice(0,-1),
                                     destinationList:place.slice(1),
                                 })
+                                if(startPlace){
+                                    _this.startPlaceChange.call(_this,startPlace)
+                                }
                             }else{
                                 Message.error(data.msg);
                             }
@@ -211,32 +304,34 @@ class AddAppointment extends React.Component {
     startPlaceChange = (value) => {
         const _this = this
         console.log(value)
-        const place = this.state.placeList
+        const startPlace = this.state.startPlaceList
         this.state.train.trainPos.map((v,i) => {
             if(v.stationName == value){
                 console.log(value)
                 _this.setState({ 
-                    destinationList: place.slice(i+1),
+                    selectStartPlace:value,
+                    destinationList: startPlace.slice(i+2), 
                 })
                 _this.props.form.setFieldsValue({
-                    startTime:moment(_this.state.train.trainPos[i].startTime,"YYYY-MM-DD HH:mm"),
-                    checkTime:moment(_this.state.train.trainPos[i].checkTime,"YYYY-MM-DD HH:mm"),
+                    startTime:moment(_this.state.train.trainPos[i].startTime,'HH:mm'),
+                    checkTime:moment(_this.state.train.trainPos[i].checkTime,'HH:mm'),
                 })
-                _this.getProduct(value)
+                _this.getProduct()
                 return
             }
         })
     }
 
     //请求休息室名称
-    getProduct = (value) => {
+    getProduct = () => {
         const _this = this 
+        const startPlace = this.state.selectStartPlace
         $.ajax({
             type: "GET",
-            //url: serveUrl + '/hsr-product/getProductByHsOrId?access_token=' + User.appendAccessToken().access_token,
-            url: 'http://192.168.0.135:8888' + "/hsr-product/getProductByHsOrId?access_token=" + User.appendAccessToken().access_token,
+            url: serveUrl + '/hsr-product/getProductByHsOrId?access_token=' + User.appendAccessToken().access_token,
+            //url: serveUrl + "/hsr-client/getClientDropdownList?access_token="+access_token,
             data: {
-                data:value
+                data:startPlace
             },
             success: function (data) {
                 console.log(data)
@@ -268,7 +363,7 @@ class AddAppointment extends React.Component {
         console.log(value)
         $.ajax({
             type: "GET",
-            url: serveUrl +'/hsr-role/getEmployeeDropdownList?access_token=' + User.appendAccessToken().access_token,
+            url: 'http://192.168.0.147:8888'+'/hsr-role/getEmployeeDropdownList?access_token=' + User.appendAccessToken().access_token,
             //url: serveUrl + "/hsr-role/getEmployeeDropdownList?access_token="+access_token,
             data: {
                 name:value
@@ -299,40 +394,56 @@ class AddAppointment extends React.Component {
 
     handleOk = () => {
         const _this = this
-        console.log(this.state.passengerList)
         this.props.form.validateFields((err, values) => {
             if(!err){
                 console.log(values)
+                //订单Id
+                values.orderId = _this.state.updateInfo.orderId
                  //高铁日期
                 values.trainTime = moment(values.trainTime).format('YYYY-MM-DD')
                 //开车时间
-                values.startTime = moment(values.startTime).format("YYYY-MM-DD HH:mm:ss")
+                values.startTime = moment(values.startTime).format('YYYY-MM-DD HH:mm:ss')
                 //检票时间
-                values.checkTime = moment(values.checkTime).format("YYYY-MM-DD HH:mm:ss")
+                values.checkTime = moment(values.checkTime).format('YYYY-MM-DD HH:mm:ss')
                 //客户到达时间
-                values.travellerComeTime = moment(values.travellerComeTime).format("YYYY-MM-DD HH:mm:ss")
+                values.travellerComeTime = moment(values.travellerComeTime).format('YYYY-MM-DD HH:mm:ss')
                 //客户离开时间
-                values.travellerLeaveTime = moment(values.travellerLeaveTime).format("YYYY-MM-DD HH:mm:ss")
+                values.travellerLeaveTime = moment(values.travellerLeaveTime).format('YYYY-MM-DD HH:mm:ss')
                 //休息室
                 const product = values.productName.split('&')
-                values.productId = product[0]
-                values.productName = product[1]  
+                if(product.length > 1){
+                    values.productId = product[0]
+                    values.productName = product[1]  
+                }else{
+                    values.productId = _this.state.updateInfo.productId
+                    values.productName = product[0]  
+                }
                 //是否收费
-                values.isCharge =  values.isCharge == '是' ? 1 : 0                    
+                values.isCharge =  values.isCharge == '是' ? 1 : 0           
                 //是否删除
                 values.isDeleted = 0
                 //状态
                 values.status = 1
                 //添加旅客
-                values.travellerData = _this.state.passengerList
+                values.travellerData = this.state.passengerList
                 //客户名
                 const clientName = values.clientName.split('&')
-                values.clientId = clientName[0]
-                values.clientName = clientName[1]
+                if(clientName.length > 1){
+                    values.clientId = clientName[0]
+                    values.clientName = clientName[1]
+                }else{
+                    values.clientId = _this.state.updateInfo.clientId
+                    values.clientName = clientName[0]
+                }
                 //登记人
                 const register = values.register.split('&')
-                values.register = register[0]
-                values.registerName = clientName[1]
+                if(register.length > 1){
+                    values.register = register[0]
+                    values.registerName = clientName[1]
+                }else{
+                    values.register = _this.state.updateInfo.register
+                    values.registerName = clientName[0]
+                }
                 console.log(values)
                 $.ajax({
                     type: "POST",
@@ -345,6 +456,7 @@ class AddAppointment extends React.Component {
                         if(data.status == 200 ){
                             if(data.data != null){
                                 Message.error(data.msg);
+                                
                             }else{
                                 Message.success(data.msg);
                                 hashHistory.push('/order')
@@ -363,36 +475,53 @@ class AddAppointment extends React.Component {
         this.props.form.validateFields((err, values) => {
             if(!err){
                 console.log(values)
+                //订单Id
+                values.orderId = _this.state.updateInfo.orderId
                  //高铁日期
                 values.trainTime = moment(values.trainTime).format('YYYY-MM-DD')
                 //开车时间
-                values.startTime = moment(values.startTime).format("YYYY-MM-DD HH:mm:ss")
+                values.startTime = moment(values.startTime).format('YYYY-MM-DD HH:mm:ss')
                 //检票时间
-                values.checkTime = moment(values.checkTime).format("YYYY-MM-DD HH:mm:ss")
+                values.checkTime = moment(values.checkTime).format('YYYY-MM-DD HH:mm:ss')
                 //客户到达时间
-                values.travellerComeTime = moment(values.travellerComeTime).format("YYYY-MM-DD HH:mm:ss")
+                values.travellerComeTime = moment(values.travellerComeTime).format('YYYY-MM-DD HH:mm:ss')
                 //客户离开时间
-                values.travellerLeaveTime = moment(values.travellerLeaveTime).format("YYYY-MM-DD HH:mm:ss")
+                values.travellerLeaveTime = moment(values.travellerLeaveTime).format('YYYY-MM-DD HH:mm:ss')
                 //休息室
                 const product = values.productName.split('&')
-                values.productId = product[0]
-                values.productName = product[1]   
+                if(product.length > 1){
+                    values.productId = product[0]
+                    values.productName = product[1]  
+                }else{
+                    values.productId = _this.state.updateInfo.productId
+                    values.productName = product[0]  
+                } 
                 //是否收费
-                values.isCharge =  values.isCharge == '是' ? 1 : 0                   
+                values.isCharge =  values.isCharge == '是' ? 1 : 0                     
                 //是否删除
                 values.isDeleted = 0
                 //状态
-                values.status = 0
+                values.status = 1
                 //添加旅客
                 values.travellerData = this.state.passengerList
                 //客户名
                 const clientName = values.clientName.split('&')
-                values.clientId = clientName[0]
-                values.clientName = clientName[1]
+                if(clientName.length > 1){
+                    values.clientId = clientName[0]
+                    values.clientName = clientName[1]
+                }else{
+                    values.clientId = _this.state.updateInfo.clientId
+                    values.clientName = clientName[0]
+                }
                 //登记人
                 const register = values.register.split('&')
-                values.register = register[0]
-                values.registerName = clientName[1]
+                if(register.length > 1){
+                    values.register = register[0]
+                    values.registerName = clientName[1]
+                }else{
+                    values.register = _this.state.updateInfo.register
+                    values.registerName = clientName[0]
+                }
                 console.log(values)
 
                 $.ajax({
@@ -406,10 +535,9 @@ class AddAppointment extends React.Component {
                         if(data.status == 200 ){
                             if(data.data != null){
                                 Message.error(data.msg);
-                                
                             }else{
                                 Message.success(data.msg);
-                                hashHistory.go('/order')
+                                hashHistory.push('/order')
                             }
                         }else{
                             Message.error(data.msg);
@@ -469,6 +597,7 @@ class AddAppointment extends React.Component {
                     <div className="breadcrumb">
                         <Breadcrumb>
                             <Breadcrumb.Item>订单管理</Breadcrumb.Item>
+                            <Breadcrumb.Item>添加订单</Breadcrumb.Item>
                         </Breadcrumb>
                     </div>
                 </div>
@@ -478,7 +607,7 @@ class AddAppointment extends React.Component {
                             <span>客户信息</span>
                         </div>
                         <Row style={{padding:'20px'}}>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                     label="客户名称" 
                                 >
@@ -502,7 +631,7 @@ class AddAppointment extends React.Component {
                     <div className="order-passenger">
                         <div className="title">
                             <span>旅客信息</span>
-                            <div className='passengerButton' >
+                            <div className='passengerButton'>
                                 <Button type="primary" onClick={ _this.addPassModal.bind(_this) } className="addPassenger">增加旅客</Button>
                             </div>
                         </div>
@@ -513,8 +642,8 @@ class AddAppointment extends React.Component {
                         <div className="title">
                             <span>高铁信息</span>
                         </div>
-                        <Row style={{padding:'10px 20px',marginTop:10}}>
-                            <Col span={12}>
+                        <Row style={{padding:'10px 20px'}}>
+                            <Col span={8}>
                                 <FormItem
                                     label="高铁日期"
                                 >
@@ -525,7 +654,7 @@ class AddAppointment extends React.Component {
                                     )}
                                 </FormItem>
                             </Col>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                     label="开车时间"
                                 >
@@ -538,7 +667,7 @@ class AddAppointment extends React.Component {
                             </Col>
                         </Row>
                         <Row style={{padding:'10px 20px'}}>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                     label="高铁车次"
                                 >
@@ -549,7 +678,7 @@ class AddAppointment extends React.Component {
                                     )}
                                 </FormItem>
                             </Col>
-                        <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                     label="检票时间"
                                 >
@@ -562,20 +691,20 @@ class AddAppointment extends React.Component {
                             </Col>
                         </Row>
                         <Row style={{padding:'10px 20px'}}>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                     label="出发地"
                                 >
                                     {getFieldDecorator('startPlace', {
                                         
                                     })(
-                                        <Select onChange={_this.startPlaceChange.bind(_this)} placeholder="请选择出发地">
+                                        <Select onSelect={_this.startPlaceChange.bind(_this)} placeholder="请选择出发地">
                                             {_this.state.startPlaceList}
                                         </Select>
                                     )}
                                 </FormItem>
                             </Col>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                     label="检票口"
                                 >
@@ -588,7 +717,7 @@ class AddAppointment extends React.Component {
                             </Col>
                         </Row>
                         <Row style={{padding:'10px 20px 20px'}}>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                     label="目的地"
                                 >
@@ -607,8 +736,8 @@ class AddAppointment extends React.Component {
                         <div className="title">
                             <span>服务信息</span>
                         </div>
-                        <Row style={{padding:'10px 20px',marginTop:10}}>
-                            <Col span={12}>
+                        <Row style={{padding:'10px 20px'}}>
+                            <Col span={8}>
                                 <FormItem
                                     label="休息室名称"
                                 >
@@ -621,7 +750,7 @@ class AddAppointment extends React.Component {
                                     )}
                                 </FormItem>
                             </Col>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                         label="客户到达时间"
                                     >
@@ -634,7 +763,7 @@ class AddAppointment extends React.Component {
                             </Col>
                         </Row>
                         <Row style={{padding:'10px 20px'}}>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                         label="客户离开时间"
                                     >
@@ -645,7 +774,7 @@ class AddAppointment extends React.Component {
                                     )}
                                 </FormItem>
                             </Col>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                     label="服务人次" 
                                 >
@@ -658,7 +787,7 @@ class AddAppointment extends React.Component {
                             </Col>
                         </Row>
                         <Row style={{padding:'10px 20px'}}>
-                            <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                     label="是否收费"
                                 >
@@ -672,7 +801,7 @@ class AddAppointment extends React.Component {
                                     )}
                                 </FormItem>
                             </Col>
-                            <Col span={12} className="type">
+                            <Col span={8} className="type">
                                 <FormItem
                                     label="收费类型"
                                 >
@@ -689,7 +818,7 @@ class AddAppointment extends React.Component {
                             </Col>
                         </Row>
                         <Row style={{padding:'10px 20px 20px'}} className="type">
-                            <Col span={12}>
+                            <Col span={8}>
                                 <FormItem
                                     label="服务价格" 
                                 >
@@ -706,8 +835,8 @@ class AddAppointment extends React.Component {
                         <div className="title">
                             <span>登记信息</span>
                         </div>
-                        <Row style={{padding:'10px 20px 20px',marginTop:10}}>
-                            <Col span={12}>
+                        <Row style={{padding:'10px 20px 20px'}}>
+                            <Col span={8}>
                                 <FormItem
                                     label="登记人" 
                                 >
@@ -725,12 +854,12 @@ class AddAppointment extends React.Component {
                             </Col>
                         </Row>
                     </div>
-                        <Row style={{padding:'20px',textAlign:'center'}}>
-                             <Col span={24}>
-                            <span style={{display:'inline-block'}} className='btn-search' onClick={_this.handleOk.bind(_this)}>提交</span>
-                            <span className='btn-cancel' style={{display:'inline-block',marginLeft:10}} onClick={_this.handleCancle.bind(_this)}>取消</span>
-                             </Col>
+                    <div className="order-submit">
+                        <Row style={{padding:'20px'}}>
+                            <Button type="primary" onClick={_this.handleOk.bind(_this)}>提交</Button>
+                            <Button type="primary" onClick={_this.handleCancle.bind(_this)}>取消</Button>
                         </Row>
+                    </div>
                 </Form>
 
                 <Modal title="警告"
@@ -743,7 +872,7 @@ class AddAppointment extends React.Component {
                  </Modal>
 
                 <Modal title={'添加/修改旅客'}
-                     key={_this.state.addKey}
+                     key={_this.state.updateKey}
                      visible={_this.state.visibleAdd}
                      onOk={_this.addPassengerOk.bind(_this)}
                      onCancel={_this.addPassengerCancel.bind(_this)}

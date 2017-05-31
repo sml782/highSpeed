@@ -8,6 +8,7 @@ import { Breadcrumb, Form, Row, Col, Input, Button, Icon, Select, Popconfirm, me
 import { Link } from 'react-router'
 import $ from 'jquery'
 import moment from 'moment'
+import { serveUrl, User, cacheData, loginFlag,userMsg,setCookie,getCookie } from '../../utils/config';
 
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
@@ -52,6 +53,8 @@ class Order extends React.Component {
     handleReset = () => {
         this.props.form.resetFields();
     }
+
+   
 
     
 

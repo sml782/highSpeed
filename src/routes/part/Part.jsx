@@ -5,7 +5,7 @@ import { hashHistory } from 'react-router';
 import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Modal,AutoComplete} from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
-import { serveUrl, User, cacheData} from '../../utils/config';
+import { serveUrl, User, cacheData,access_token} from '../../utils/config';
 import DeleteDialog from '../DeleteDialog';//引入删除弹框
 
 const FormItem = Form.Item;
@@ -13,6 +13,7 @@ const Option = Select.Option;
 const Search = Input.Search;
 const AutoCompleteOption = AutoComplete.Option;
 const msg = '确认删除该员工吗?';
+const url = 'http://192.168.0.147:8888/';
 
 class ServiceList extends React.Component {
     constructor(props) {
@@ -40,41 +41,13 @@ class ServiceList extends React.Component {
         //     hashHistory.push('/login');
         // }
         this.getInitList(this.state.partListDateCurrent,this.state.partListDatePageSize)
-        var data = []
-        for(var i = 0;i < 100;i++){
-            data.push({
-                key:i,
-                roleId:i,
-                name:['张三','李四','王五'][Math.floor(Math.random()*3)],
-                account:['a','b','c'][Math.floor(Math.random()*3)],
-                retiring:['A10','B20','C30'][Math.floor(Math.random()*3)],
-                productName:['A10','B20','C30'][Math.floor(Math.random()*3)],
-            })
-        }
-        this.setState({partListDate:data, partListDateLength:data.length})
 
     }
     componentDidMount=()=>{
         $(".ant-breadcrumb-separator").html(">");
         $(".ant-breadcrumb-separator").css({color:'#333'});
         const _this = this
-        $.ajax({
-            type: "GET",
-            url: serveUrl+"/hsr-role/getRoleList?access_token="+ User.appendAccessToken().access_token,
-            contentType: 'application/json;charset=utf-8',
-            success: function(data){
-                if(data.status == 200 ){
-                    if(data.data != null){
-                        message.error(data.data);
-                    }else{
-                        message.success(data.msg);
-                        _this.setState({partListDate:data.data, partListDateLength:data.data.total})
-                    }
-                }else{
-                    message.error(data.msg);
-                }
-            }
-        });
+        this.getInitList(this.state.partListDateCurrent,this.state.partListDatePageSize)
     }
 
     componentDidUpdate=()=>{    
@@ -82,7 +55,6 @@ class ServiceList extends React.Component {
         $("table").css({border:'1px solid #f0f0f0'});
     }
    handleSubmit =(e)=>{
-       console.log(e)
        e.preventDefault()
     }
    
@@ -93,20 +65,21 @@ class ServiceList extends React.Component {
             if (!err) {
                 $.ajax({
                     type: "GET",
-                    url: serveUrl+"guest-employee/list?access_token="+ User.appendAccessToken().access_token,
-                    data:JSON.stringify({
-                            page:page,
-                            rows:rows,
-                            name:values.institutionClientName
-                        }),
+                    url: url+"hsr-role/getRoleList?access_token="+ User.appendAccessToken().access_token,
+                    data:{
+                        page:page,
+                        rows:rows,
+                    },
                     success: function(data){
-                        data.data.rows.map((v,index)=>{
-                            v.key = v.employee_id
-                        })
-                        _this.setState({
-                            partListDate: data.data.rows,
-                            partListDateLength:data.data.total
-                        })
+                        if(data.status == 200){
+                            data.data.rows.map((v,index)=>{
+                                v.key = v.employee_id
+                            })
+                            _this.setState({
+                                partListDate: data.data.rows,
+                                partListDateLength:data.data.total
+                            })
+                        }
                     }
                 });
             }
@@ -130,17 +103,13 @@ class ServiceList extends React.Component {
         $.ajax({
             type: "POST",
             contentType: 'application/json;charset=utf-8',
-            url: serveUrl + "/hsr-role/deleteRoles?access_token="+User.appendAccessToken().access_token,
+            url: url + "hsr-role/deleteRoles?access_token="+User.appendAccessToken().access_token,
             data: JSON.stringify({
                 data: [parseInt(_this.state.roleId)]
             }),
             success: function (data) {
                 if(data.status == 200 ){
-                    if(data.data != null){
-                        message.error(data.data);
-                    }else{
-                        message.success(data.msg);
-                    }
+                    message.success(data.msg);
                 }else{
                     message.error(data.msg);
                 }
@@ -155,11 +124,21 @@ class ServiceList extends React.Component {
         });
     }
     
+    addPart = () => {
+        hashHistory.push('/addPart')
+    }
     //编辑角色
     editPart = (record) => {
-        var roleId = record.roleId
-        console.log(roleId)
-        hashHistory.push(`/addPart/${roleId}`)
+        var roleId = record.roleId;
+        hashHistory.push(`/editPart/${roleId}`)
+    }
+
+    //新增角色
+    addPart = (record) => {
+        hashHistory.push(`/addPart`)
+    }
+    showTotal(total) {
+      return `共 ${total} 条`;
     }
 
 
@@ -168,7 +147,7 @@ class ServiceList extends React.Component {
         const _this = this;
         const columns = [ {
             title: '管理员姓名',
-            width: '15%',
+            width: '20%',
             dataIndex: 'name',
             render(text,record) {
                 return (
@@ -177,7 +156,7 @@ class ServiceList extends React.Component {
             }
         }, {
             title: '登录名称',
-            width: '15%',
+            width: '20%',
             dataIndex: 'account',
             render(text,record) {
                 return (
@@ -186,31 +165,24 @@ class ServiceList extends React.Component {
             }
         }, {
             title: '关联休息室',
-            width: '20%',
-            dataIndex: 'retiring',
-            render(text,record) {
-                return (
-                        <div className="order">{text}</div>
-                        )
-            }
-        }, {
-            title: '菜单权限',
-            width: '20%',
+            width: '30%',
             dataIndex: 'productName',
             render(text,record) {
                 return (
                         <div className="order">{text}</div>
                         )
             }
-        },{
+        }, {
             title: '操作',
             width: '30%',
             dataIndex: 'handle',
             render(text,record) {
                 return (
                         <div className="order">
-                            <a onClick={_this.showModalDel.bind(_this,record)} style={{color:'#4778c7'}}>删除</a>&nbsp;&nbsp;
-                            <a onClick={_this.editPart.bind(_this,record)} style={{marginRight:10,color:'#4778c7'}}>编辑</a>
+                            <span onClick={_this.editPart.bind(_this,record)} className='listRefresh'>编辑</span>
+                            <Popconfirm title="确认删除?" onConfirm={() => _this.showModalDel.bind(_this,record)}>
+                            <span  style={{marginLeft:4}} className='listCancel'>删除</span>
+                            </Popconfirm>
                         </div>
                         )
             }
@@ -218,6 +190,8 @@ class ServiceList extends React.Component {
 
        const pagination = {
             total: this.state.partListDateLength,
+            size:'small',
+            showTotal:this.showTotal ,
             onShowSizeChange(current, pageSize) {
                 _this.state.partListDateCurrent = current;
                 _this.state.partListDatePageSize = pageSize;
@@ -242,11 +216,8 @@ class ServiceList extends React.Component {
                  <div className="box">
                     
                     <Row>
-                        <Col>
-                            <button className="btn"><a href="#/addPart" style={{color:'#fff'}} >添加角色</a></button>
-                        </Col>
+                        <div className='btn-add' style={{marginLeft:'87%'}} onClick={this.addPart}><span>新增角色</span><img src={require('../../assets/images/add.png')} className='addImg'/></div>
                         <div className="search-result-list" >
-                            <p style={{marginTop: 20}}>共有{this.state.partListDateLength}条数据</p>
                             <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={this.state.partListDate}  className="serveTable"/>
                         </div>
                     </Row>

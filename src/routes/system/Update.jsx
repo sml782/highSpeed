@@ -299,7 +299,6 @@ class AddPart extends React.Component {
                 </div>
 
                  <div className="box">
-                    
                     <Form layout={'horizontal'} style={{marginTop:44}}>
                         <FormItem label="角色姓名" {...formItemLayout} required >
                             {getFieldDecorator('name', {

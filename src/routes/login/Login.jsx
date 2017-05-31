@@ -52,17 +52,17 @@ class Login extends React.Component {
         const _this = this;
         e.preventDefault();
         _this.props.form.validateFields((err, values) => {
-            if ($('.user').val() && $('.pwd').val()) {
+            if ($('#user').val() && $('#pwd').val()) {
                 $.ajax({
                     type: 'POST',
-                    url: 'http://airport.zhiweicloud.com/oauth/oauth/access_token',
-                    // url:'http://101.37.106.176/oauth/oauth/access_token',
+                    //url: 'http://airport.zhiweicloud.com/oauth/oauth/access_token',
+                    url:'http://101.37.106.176/oauth/oauth/access_token',
                     data: {
                         grant_type: 'password',
                         client_id: 'LJG',
                         client_secret: 111111,
-                        username: $('.user').val(),
-                        password: $('.pwd').val(),
+                        username: $('#user').val(),
+                        password: $('#pwd').val(),
                         scope: "",
                     },
                     success: function (data) {
@@ -70,7 +70,7 @@ class Login extends React.Component {
                             //获取用户名称
                             $.ajax({
                                 type: "GET",
-                                url: serveUrl+"guest-employee/getUserName",
+                                url: serveUrl+"/hsr-role/getRoleById",
                                 // url: "http://192.168.0.101:8887/getUserName",
                                 data: { access_token:data.access_token},
                                 success: function (data) {
@@ -80,13 +80,13 @@ class Login extends React.Component {
                                 }
                             });
                             if (_this.state.remmberPwd) {
-                                setCookie('pwd', $('.pwd').val(), 1);
-                                setCookie('user', $('.user').val(), 1);
+                                setCookie('pwd', $('#pwd').val(), 1);
+                                setCookie('user', $('#user').val(), 1);
                             }
                             User.login(data);
-                            cacheData.set('username', $('.user').val());
+                            cacheData.set('username', $('#user').val());
                             setTimeout(function(){
-                                hashHistory.push('/');
+                                hashHistory.push('/order');
                             },500);
                         }
                         else{
@@ -113,23 +113,18 @@ class Login extends React.Component {
                         <img src={require('../../assets/images/icon.png')} alt="贵宾云logo" />
                         <img src={require('../../assets/images/tit.png')} alt="贵宾云标题" />
                     </span>
-                    <span>
-                        <img src={require('../../assets/images/line.png')} alt="隔线" />
-                    </span>
-                    <span className="text">智慧贵宾系统云平台</span>
                 </div>
-
-                <div className="login-box">
-                    <div className="inline-box"></div>
-                    <p >登录</p>
+                <span className='welcom-word'>欢迎你来到,</span>
+                <span className='title-word'>智慧贵宾系统云平台</span>
+                <span className='company-word'>广州风数信息科技有限公司</span>
+                <img src={require('../../assets/images/computer.png')} className='computer-img' />
                     <Form className="login-form" horizontal onSubmit={this.handleSubmit}>
                         <FormItem>
                             {getFieldDecorator('userName', {
                                 rules: [{ message: '请输入用户名!' }],
                             })(
                                 <div className="login-input">
-                                    <img src={require('../../assets/images/head.png')} alt="头像图标" />
-                                    <input className="user" type="text" placeholder="请输入用户名" />
+                                    <input className="login-input" id='user' type="text" placeholder="用户名" />
                                 </div>
                                 )}
                         </FormItem>
@@ -138,21 +133,20 @@ class Login extends React.Component {
                                 rules: [{ message: '请输入密码!' }],
                             })(
                                 <div className="login-input">
-                                    <img src={require('../../assets/images/lock.png')} alt="密码图标" />
-                                    <input className="pwd" type="password" placeholder="请输入密码" />
+                                    <input className="login-input" id='pwd' type="password" placeholder="密码" />
                                 </div>
                                 )}
                         </FormItem>
-                        <div className="remmber" style={{ marginBottom: 24 }} >
-                            <Checkbox style={{ float: 'right', color: '#fff' }} onChange={this.remmberPwd} checked={this.state.remmberPwd}>记住密码</Checkbox>
+                        <section>
+                        <div className="checkboxFour">
+                            <input type="checkbox" value="1" onChange={this.remmberPwd} checked={this.state.remmberPwd} style={{display:'none'}} id="checkboxFourInput" name="" />
+                            <label htmlFor="checkboxFourInput"></label>
                         </div>
-                        <button style={{ width: 170, height: 32, lineHeight: '32px', padding: 0, textAlign: 'center', position: 'absolute', left: '50%', marginLeft: '-90px' }} className="btn">登 录</button>
+                        <span style={{display:'inline-block'}} className='remeber-psw'>记住密码</span>
+                        </section>
+                        <span className="login-btn" onClick={this.handleSubmit}>登 录</span>
                     </Form>
                 </div>
-                <div className="login-footer">
-                    <p>广州风数信息科技有限公司</p>
-                </div>
-            </div>
         )
     }
 }

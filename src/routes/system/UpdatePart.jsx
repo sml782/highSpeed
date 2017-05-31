@@ -193,6 +193,7 @@ class UpdatePart extends React.Component {
                 return (
                         <div className="order">
                             <Checkbox checked={text.status} onChange={_this.onChange.bind(_this,text)}></Checkbox>
+                            
                         </div>
                         )
             }

@@ -3,12 +3,9 @@
     padding: 0 150px;
 }
 .order-add-g .ant-form-item-control {
-    width: 300px;
+    width: 200px;
     .ant-calendar-picker{
-        width: 100%;
-    }
-    .ant-calendar-picker{
-        width: 100%;
+        width: 200px !important;
     }
 }
 .order-add-g .title{
@@ -22,11 +19,12 @@
     width: 100px;
 }
 
+
 //增加旅客按钮
 .passengerButton{
     width: 170px;
     position: absolute;
-    right: 0;
+    right: -80px;
     top:0;
     .ant-btn{
        position: absolute;
@@ -37,6 +35,14 @@
        &:last-child{
            right: 0;
        }
+    }
+}
+.passenger-list{
+    .ant-table-thead > tr > th {
+        text-align: center;
+    }
+    .ant-table-tbody > tr > td {
+        text-align: center;
     }
 }
 

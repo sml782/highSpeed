@@ -16,16 +16,12 @@ class Order extends React.Component {
     constructor (props) {
         super(props);
         this.state = {
-            formLayout: 'inline',
+            queryValues:[]
         }
     }
 
     componentWillMount () {
-        // if(User.isLogin()){
-
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+       
         
     }
 
@@ -33,37 +29,29 @@ class Order extends React.Component {
         //TODO AJAX
     }
 
-    componentWillUpdate () {
-
-    }
-
-    onchange () {
-
-    }
-
     handleSearch = (e) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
-            console.log('Received values of form: ', values);
-        });
+            if(!err){
+                values.queryTrainTime = moment(values.queryTrainTime).format("YYYY-MM-DD")
+                console.log(values)
+                this.setState({queryValues:values})
+            }
+            
+        })
     }
 
-    handleFormLayoutChange = (e) => {
-        this.setState({ formLayout: e.target.value });
-    }
 
     handleReset = () => {
         this.props.form.resetFields();
     }
 
     render () {
+        const _this = this
         const { getFieldDecorator } = this.props.form;
         const { formLayout } = this.state;
-        const formCol = { span: 6, offset:1};
+        const formCol = { span: 8};
         const buttonItemLayout = null;
-        const config = {
-            rules: [{ type: 'object', message: '请选择高铁日期!' }],
-        }
 
         return (
             <div>
@@ -75,21 +63,28 @@ class Order extends React.Component {
                         </Breadcrumb>
                     </div>
                 </div>
-                <Form layout={formLayout} className="order-search-g">
+                <Form layout={'inline'} className="order-search-g">
                     <Row className="order-search">
                         <Col {...formCol}>
                             <FormItem
                                 label="高铁车次" 
                             >
-                                <Input placeholder="请输入客户车次" />
+                                {getFieldDecorator('queryTrainCode', {})(
+                                    <Input placeholder="请输入客户车次" />
+                                )}
                             </FormItem>
                         </Col>
                         <Col  {...formCol}>
                             <FormItem
                                 label="旅客姓名" 
-                            >
-                                <Input placeholder="旅客姓名" />
+                            >   
+                                {getFieldDecorator('queryTravellerName', {})(
+                                    <Input placeholder="旅客姓名" />
+                                )}
                             </FormItem>
+                        </Col>
+                         <Col  span={7} style={{marginLeft:35}}>
+                            <div className='btn-add'><Link to='/addAppointment'><span>添加订单</span><img src={require('../../assets/images/add.png')} className='addImg'/></Link></div>
                         </Col>
                     </Row>
                     <Row className="order-search">
@@ -97,28 +92,28 @@ class Order extends React.Component {
                             <FormItem
                                 label="客户名称"
                             >
-                                <Input placeholder="请输入客户名称" />
+                                {getFieldDecorator('queryClientName', {})(
+                                    <Input placeholder="请输入客户名称" />
+                                )}
                             </FormItem>
                         </Col>
                         <Col  {...formCol}>
                             <FormItem
                                 label="高铁日期"
                             >
-                                {getFieldDecorator('highSpeedDate', config)(
+                                {getFieldDecorator('queryTrainTime', {
+                                    initialValue:moment(new Date(), 'YYYY-MM-DD')
+                                })(
                                     <DatePicker />
                                 )}
                            </FormItem>
-                        </Col>
-                        <FormItem {...buttonItemLayout}>
-                            <Button type="primary" size="large">搜索</Button>
-                        </FormItem>
+                        </Col>                        
+                        <Col  span={7} style={{marginLeft:35}}>
+                            <div className='btn-search' onClick={_this.handleSearch.bind(_this)}><img src={require('../../assets/images/search.png')} className='seacrhImg'/><span>查&nbsp;询</span></div>
+                       </Col>   
                     </Row>
                 </Form>
-                <div className="order-menu">
-                    <Button type="primary" className="add-order"><Link to="/addAppointment" >添加订单</Link></Button>
-                    <Button className="leave-order">确认离开</Button>
-                </div>
-                <OrderList />
+                <OrderList initVal={_this.state.queryValues} />
             </div>
         )
     }

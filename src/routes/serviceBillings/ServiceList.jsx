@@ -6,19 +6,24 @@ import { Breadcrumb, Form, Row, Col, Input, Button, Icon, Select, Popconfirm, me
 import { Link } from 'react-router'
 import $ from 'jquery'
 import moment from 'moment'
+import { serveUrl, User, cacheData, loginFlag,userMsg,setCookie,getCookie } from '../../utils/config';
+
 
 const columns = []
 columns[0] = [{
   title: '高铁日期',
-  dataIndex: 'date',
+  dataIndex: 'trainTime',
   width:130,
+  render(text,record) {
+      return <span>{moment(record.trainTime).format('YYYY-MM-DD HH:MM')}</span>
+  }
 }, {
   title: '高铁车站',
-  dataIndex: 'station',
+  dataIndex: 'trainStation',
   width:110,
 }, {
   title: '休息室名称',
-  dataIndex: 'lounge',
+  dataIndex: 'productName',
   width:130,
 }, {
   title: '客户名称1',
@@ -46,63 +51,101 @@ columns[0] = [{
   width:110,
 }, {
   title: '接待统计',
-  dataIndex: 'count',
+  dataIndex: 'serverCount',
   width:130,
 }]
 
 columns[1] = [{
   title: '订单编号',
-  dataIndex: 'no',
+  dataIndex: 'orderId',
   width:150,
   fixed:'left',
 }, {
   title: '高铁车站',
   dataIndex: 'station',
   width:110,
+  render(text,record) {
+      return <span>{record.train.startPlace}</span>
+  }
 }, {
   title: '高铁日期',
   dataIndex: 'date',
   width:130,
+  render(text,record) {
+      return <span>{record.train.trainTime}</span>
+  }
 }, {
   title: '休息室名称',
-  dataIndex: 'lounge',
+  dataIndex: 'productName',
   width:130,
 }, {
   title: '客户名称',
-  dataIndex: 'customerName',
+  dataIndex: 'clientName',
   width:110,
 }, {
   title: '旅客姓名',
   dataIndex: 'passengerName',
   width:110,
+  render(text,record) {
+      let text1 = ''
+      record.travellerList.map((v,index)=>{
+        if(index == 0){
+          text1 = v.travellerName
+        }else{
+          text1 = text1 + ',' +v.travellerName
+        }
+      })
+      return <span>{text1}</span>
+  }
 }, {
   title: '车次',
   dataIndex: 'trainNo',
   width:110,
+    render(text,record) {
+      return <span>{record.train.trainCode}</span>
+  }
 }, {
   title: '出发地',
   dataIndex: 'departure',
   width:110,
+  render(text,record) {
+      return <span>{record.train.startPlace}</span>
+  }
 }, {
   title: '目的地',
   dataIndex: 'destination',
   width:110,
+    render(text,record) {
+      return <span>{record.train.destinationPlace}</span>
+  }
 }, {
   title: '开车时间',
   dataIndex: 'drivingTime',
   width:130,
+  render(text,record) {
+      return <span>{moment(record.train.startTime).format('MM-DD HH:mm')}</span>
+  }
 }, {
   title: '检票时间',
   dataIndex: 'checkinTime',
   width:100,
+     render(text,record) {
+      return <span>{moment(record.train.checkTime).format('MM-DD HH:mm')}</span>
+  }
 }, {
   title: '旅客进入时间',
-  dataIndex: 'entranceTime',
+  dataIndex: 'travellerComeTime',
   width:130,
+  render(text,record) {
+      return <span>{moment(record.travellerComeTime).format('MM-DD HH:mm')}</span>
+  }
 }, {
   title: '旅客离开时间',
-  dataIndex: 'leaveTime',
+  dataIndex: 'travellerLeaveTime',
   width:130,
+  render(text,record) {
+      return <span>{moment(record.travellerLeaveTime).format('MM-DD HH:mm')}</span>
+  }
 }, {
   title: '休息时长',
   dataIndex: 'restTime',
@@ -115,47 +158,104 @@ columns[1] = [{
 
 columns[2] = [{
   title: '日期',
-  dataIndex: 'date',
+  dataIndex: 'trainTime',
   width:130,
+  render(text,record) {
+      return <span>{moment(record.trainTime).format('YYYY-MM-DD HH:mm')}</span>
+  }
 }, {
   title: '高铁车站',
-  dataIndex: 'station',
+  dataIndex: 'trainName',
   width:110,
 }, {
   title: '休息室名称',
-  dataIndex: 'lounge',
+  dataIndex: 'productName',
   width:130,
 }, {
   title: '刷卡人次',
   dataIndex: 'name1',
   width:110,
+  render(text,record) {
+      let text1=''
+      record.consumeList.map((v,index)=>{
+        if(v.type=='2'){
+          text1=v.num
+        }
+      })
+      return <span>{text1}</span>
+  }
 }, {
   title: '刷卡金额',
   dataIndex: 'degree1',
   width:110,
+  render(text,record) {
+      let text1=''
+      record.consumeList.map((v,index)=>{
+        if(v.type=='2'){
+          text1=v.acount
+        }
+      })
+      return <span>{text1}</span>
+  }
 }, {
   title: '现金人次',
   dataIndex: 'name2',
   width:110,
+  render(text,record) {
+      let text1=''
+      record.consumeList.map((v,index)=>{
+        if(v.type=='3'){
+          text1=v.num
+        }
+      })
+      return <span>{text1}</span>
+  }
 }, {
   title: '现金金额',
   dataIndex: 'degree2',
   width:110,
+  render(text,record) {
+      let text1=''
+      record.consumeList.map((v,index)=>{
+        if(v.type=='3'){
+          text1=v.acount
+        }
+      })
+      return <span>{text1}</span>
+  }
 }, {
   title: '网络人次',
   dataIndex: 'name3',
   width:110,
+  render(text,record) {
+      let text1=''
+      record.consumeList.map((v,index)=>{
+        if(v.type=='4'){
+          text1=v.num
+        }
+      })
+      return <span>{text1}</span>
+  }
 }, {
   title: '网络金额',
   dataIndex: 'degree3',
   width:110,
+  render(text,record) {
+      let text1=''
+      record.consumeList.map((v,index)=>{
+        if(v.type=='4'){
+          text1=v.acount
+        }
+      })
+      return <span>{text1}</span>
+  }
 }, {
   title: '合计人次',
-  dataIndex: 'total',
+  dataIndex: 'numAll',
   width:130,
 }, {
   title: '合计金额',
-  dataIndex: 'count',
+  dataIndex: 'acountAll',
   width:130,
 }]
 
@@ -175,6 +275,11 @@ class OrderList extends React.Component {
             data:[],
             column:[],
             scrollX:true,
+            url:'',
+            page:1,
+            rows:10,
+            billList:[],
+            flag:1,
         }
     }
 
@@ -182,18 +287,22 @@ class OrderList extends React.Component {
         const data = []
         const key = this.props.listKey
         //console.log(columns)
-        for (let i = 0; i < 100; i++) {
-            data.push({
-                key: i,
-                name1: `Edrward ${i}`,
-                age: 32,
-                address: `London Park no. ${i}`,
-            });
-        }
         this.setState({data:data,column:columns[key*1-1]})
         if(key*1 == 2){
-            this.setState({scrollX:"110%"})
+            this.setState({
+              scrollX:"150%",
+              url:'/hsr-order/getDetailBill'
+          })
+        }else if(key*1 == 1){
+            this.setState({
+              url:'/hsr-order/getCountBill'
+            })
+        }else if(key*1 == 3){
+            this.setState({
+              url:'/hsr-order/getRetailBill'
+            })
         }
+        
     }
 
     componentDidMount () {
@@ -207,20 +316,43 @@ class OrderList extends React.Component {
         }else{
             inp.not(':last-child').hide()
         }
+        this.getInitList(this.state.page,this.state.rows)
+    }
+
+    getInitList (page,rows){
+        const _this = this;
+          $.ajax({
+              type: "GET",
+              //url: serveUrl+"/hsr-role/getEmployeeById?access_token="+ User.appendAccessToken().access_token,
+              url:'http://192.168.0.135:8888'+_this.state.url+'?access_token='+ User.appendAccessToken().access_token,
+              data:{
+                  page:page,
+                  rows:rows,
+                  },
+              success: function(data){
+                  console.log(data)
+                  data.data.rows.map((v,index)=>{
+                      v.key = index
+                  })
+                  _this.setState({
+                      billList: data.data.rows
+                  })
+              }
+          });
+      }
+    showTotal(total) {
+      return `共 ${total} 条`;
     }
     
-    componentWillUpdate () {
-
-    }
-
-    onchange () {
-
-    }
 
     
     render () {
+      const pagination = {
+        size:'small',
+        showTotal:this.showTotal 
+      }
         return (
-            <Table className="order-list" rowSelection={rowSelection} columns={this.state.column} dataSource={this.state.data} scroll={{x:this.state.scrollX,y:0}} />
+            <Table className="order-list" pagination={pagination} columns={this.state.column} dataSource={this.props.listData==null?this.state.billList:this.props.listData} scroll={{x:this.state.scrollX,y:0}} />
         )
     }
 }
