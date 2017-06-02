@@ -1,7 +1,7 @@
 import './part.less'
 import React from 'react';
 import { hashHistory } from 'react-router';
-import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Tree,Modal,TreeSelect} from 'antd';
+import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Tree,Modal,TreeSelect} from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData, access_token } from '../../utils/config';
@@ -14,7 +14,6 @@ const Option = Select.Option;
 const Search = Input.Search;
 const msg = '是否删除?';
 const TreeNode = Tree.TreeNode;
-const url = 'http://192.168.0.147:8888/';
 
 function removeByValue(arr, val) {
   for(var i=0; i<arr.length; i++) {
@@ -66,12 +65,13 @@ class ServiceList extends React.Component {
         // } else{
         //     hashHistory.push('/login');
         // }
-        this.getInit()
+        
     }
     componentDidMount=()=>{
         $(".ant-modal-footer").hide();
         $(".ant-breadcrumb-separator").html(">");
         $(".ant-breadcrumb-separator").css({color:'#333'});
+        this.getInit()
     }
     componentDidUpdate=()=>{
         $(".ant-table-tbody tr td").css({borderBottom:'none'});
@@ -87,7 +87,7 @@ class ServiceList extends React.Component {
         const _this = this
         $.ajax({
             type: "GET",
-            url: url + "hsr-role/getMenuByRoleId?access_token=" + User.appendAccessToken().access_token,
+            url: serveUrl + "hsr-role/getMenuByRoleId?access_token=" + User.appendAccessToken().access_token,
             contentType:'application/json;charset=utf-8',
             data:{
                 roleId:1
@@ -178,26 +178,48 @@ class ServiceList extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 const _this = this;
-                const formData = {
-                    data:[{
-                        name: values.name,//菜单管理
-                        account: values.account,
-                        productIdList:_this.state.loungeIdList,
-                        menuIdList:_this.state.value,
-                    }]
-                };
+                 const formData = {
+                    client_id: "HSR",
+                    grant_type: "password",
+                    client_secret: "111111",
+                    username: values.account,
+                    password: values.description,
+                    password_confirmation: values.description,
+                }
                 $.ajax({
                     type: "POST",
-                    contentType:'application/json;charset=utf-8',
-                    url: url+"hsr-role/saveOrUpdateRole?access_token="+User.appendAccessToken().access_token,
+                    contentType: 'application/json;charset=utf-8',
+                    url: 'http://airport.zhiweicloud.com/oauth/auth/register',
                     data: JSON.stringify(formData),
-                    success: function(data){
-                        if(data.status == 200){
-                            message.success(data.msg);
-                            hashHistory.push('/system');
-                        }
-                        else{
-                            message.error(data.msg);
+                    success: function (data) {
+                        if (Object.prototype.toString.call(data) === "[object String]") {
+                            Message.error(JSON.parse(data).display_message.username[0]);
+                        } else {
+                            const formData1 = {
+                                 data:[{
+                                    name: values.name,
+                                    account: values.account,
+                                    productIdList:_this.state.loungeIdList,
+                                    menuIdList:_this.state.value,
+                                }]
+                            }
+                            $.ajax({
+                                type: "POST",
+                                contentType: 'application/json;charset=utf-8',
+                                // url: "http://192.168.1.199:8887/saveOrUpdate?access_token=" + User.appendAccessToken().access_token,
+                                url: serveUrl+"hsr-role/saveOrUpdateRole?access_token="+ User.appendAccessToken().access_token,
+                                data: JSON.stringify(formData1),
+                                success: function (data) {
+                                    if (data.status == 200) {
+                                        Message.success(data.msg);
+                                        hashHistory.push('/system');
+                                    }
+                                    else if (data.status == 500) {
+                                        Message.error(data.msg);
+                                    }
+                                    
+                                }
+                            });
                         }
                     }
                 });
@@ -277,7 +299,7 @@ class ServiceList extends React.Component {
                 </div>
 
                  <div className="box">                
-                    <Form horizontal style={{marginTop:44}}>
+                    <Form layout='horizontal' style={{marginTop:44}}>
                         <Row>
                             <Col span={12}>
                             <FormItem label="角色名称" {...formItemLayout} hasFeedback required style={{marginLeft:-20}} >
@@ -312,7 +334,7 @@ class ServiceList extends React.Component {
                         <FormItem labelInValue label="菜单权限" {...formItemLayout} hasFeedback style={{marginLeft:-20}}>
                             {getFieldDecorator('menuListName', {
                             })(
-                                <TreeSelect {...tProps} />
+                                <TreeSelect {...tProps} placeholder="请选择" />
                             )}
                         </FormItem>
                         </Col>
@@ -340,7 +362,7 @@ class ServiceList extends React.Component {
                         onCancel={this.handleCancelAdd.bind(this)}
                     >
                         <div>
-                            <AddPartLounge addProduct={this.addProduct}/>
+                            <AddPartLounge addProduct={this.addProduct} addCancle={_this.handleCancelAdd.bind(_this)} />
                         </div>
                     </Modal>
 

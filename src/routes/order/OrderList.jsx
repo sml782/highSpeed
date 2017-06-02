@@ -67,50 +67,58 @@ class OrderList extends React.Component {
         console.log(data)
         $.ajax({
             type: "GET",
-            //url: serveUrl+'/hsr-order/getOrderByKey?access_token=' + User.appendAccessToken().access_token,
-            url: 'http://192.168.0.135:8888' + "/hsr-order/getOrderByKey?access_token="+User.appendAccessToken().access_token,
+            url: serveUrl + 'hsr-order/getOrderByKey?access_token=' + User.appendAccessToken().access_token,
             data: data,
             success: function (data) {
                 console.log(data)
                 if(data.status == 200 ){
                     if(data.data != null){
-                        Message.success(data.msg);
+                        //Message.success(data.msg);
                         const len = data.data.rows.length
                         const d = data.data.rows
                         for(var i = 0;i < len;i++){
                             d[i].key = d[i].orderId
-                            d[i].children = d[i].travellerList
                             //高铁
                             d[i].trainCode = d[i].train.trainCode?d[i].train.trainCode:'--'
-                            d[i].trainTime = d[i].train.trainTime?d[i].train.trainTime:'--'
+                            //d[i].trainTime = d[i].train.trainTime?d[i].train.trainTime:'--'
                             d[i].startPlace = d[i].train.startPlace?d[i].train.startPlace:'--'
                             d[i].destinationPlace = d[i].train.destinationPlace?d[i].train.destinationPlace:'--'
                             //d[i].startTime = d[i].train.startTime?d[i].train.startTime:'--'
                             //d[i].checkTime = d[i].train.checkTime?d[i].train.checkTime:'--'
                             d[i].ticketBarrier = d[i].train.ticketBarrier?d[i].train.ticketBarrier:'--'
+
                             //收费
                             // d[i].isCharge = d[i].isCharge?'是':'否'
                             // d[i].type = d[i].type?d[i].type:'--'
                             // d[i].price = d[i].price?d[i].price:'--'
                             //登记人
                             d[i].register = d[i].register?d[i].register:'--'
-
-                            var travellerName = ''
-                            var phoneNumber = [d[i].travellerList[0].phoneNumber?d[i].travellerList[0].phoneNumber:'--']
-                            var seatNum = [d[i].travellerList[0].seatNum?d[i].travellerList[0].seatNum:'--']
-                            var thirdPartCode = [d[i].travellerList[0].thirdPartCode?d[i].travellerList[0].thirdPartCode:'--']
                             for(var k = 0;k < d[i].travellerList.length;k++){
-                                d[i].travellerList[k].key = d[i].travellerList[k].travellerId
-                                d[i].travellerList[k].travellerName = d[i].travellerList[k].travellerName?d[i].travellerList[k].travellerName:'--'
-                                d[i].travellerList[k].phoneNumber = d[i].travellerList[k].phoneNumber?d[i].travellerList[k].phoneNumber:'--'
-                                d[i].travellerList[k].seatNum = d[i].travellerList[k].seatNum?d[i].travellerList[k].seatNum:'--'
-                                d[i].travellerList[k].thirdPartCode = d[i].travellerList[k].thirdPartCode?d[i].travellerList[k].thirdPartCode:'--'
-                                travellerName += d[i].travellerList[k].isDeleted?'':d[i].travellerList[k].travellerName + '、'
+                                d[i].travellerList[k].key = d[i].travellerList[k].travellerId ? d[i].travellerList[k].travellerId : Math.random()
+                                d[i].travellerList[k].orderId = ''
+                                d[i].travellerList[k].trainCode = ''
+                                d[i].travellerList[k].startPlace = ''
+                                d[i].travellerList[k].destinationPlace = ''
+                                d[i].travellerList[k].trainTime = ''
+                                d[i].travellerList[k].startTime = ''
+                                d[i].travellerList[k].checkTime = ''
+                                if(!d[i].travellerList[k].isDeleted && d[i].travellerList[k].thirdPartCode !== ''){
+                                    var travellerName = d[i].travellerList[k].travellerName
+                                    var phoneNumber = d[i].travellerList[0].phoneNumber
+                                    var seatNum = d[i].travellerList[0].seatNum
+                                    var thirdPartCode = d[i].travellerList[0].thirdPartCode
+                                }else if(d[i].travellerList[k].travellerName !== ''){
+                                    var travellerName = d[i].travellerList[k].travellerName == '' ? '--' : d[i].travellerList[k].travellerName
+                                    var phoneNumber = d[i].travellerList[0].phoneNumber == '' ? '--' : d[i].travellerList[0].phoneNumber
+                                    var seatNum = d[i].travellerList[0].seatNum == '' ? '--' : d[i].travellerList[0].seatNum
+                                    var thirdPartCode = '--'
+                                }
                             }
-                            d[i].travellerName = travellerName.substring(0,travellerName.length-1)
+                            d[i].travellerName = travellerName
                             d[i].phoneNumber = phoneNumber
                             d[i].seatNum = seatNum
                             d[i].thirdPartCode = thirdPartCode
+                            d[i].children = d[i].travellerList.length > 1 ? d[i].travellerList : undefined
                         }
                         console.log(data.data.rows)
                         _this.setState({
@@ -118,11 +126,11 @@ class OrderList extends React.Component {
                             orderListDateLength: data.data.total,
                         })
                     }else{
-                        Message.error(data.msg);
+                        //Message.error(data.msg);
                         
                     }
                 }else{
-                    message.error(data.msg);
+                    Message.error(data.msg);
                 }
             }
         });
@@ -134,8 +142,7 @@ class OrderList extends React.Component {
         const _this = this
         $.ajax({
             type: "POST",
-            //url: serveUrl + "/hsr-order/deleteOrder?access_token="+User.appendAccessToken().access_token,
-            url: 'http://192.168.0.135:8888' + "/hsr-order/deleteOrder?access_token="+User.appendAccessToken().access_token,
+            url: serveUrl + "hsr-order/deleteOrder?access_token=" + User.appendAccessToken().access_token,
             data: {orderId:record.orderId},      
             success: function (data) {
                 console.log(data)
@@ -200,7 +207,7 @@ class OrderList extends React.Component {
         sorter: (a, b) => a.time - b.time,
         render: (text,record) => (
             <div>
-                <span >{moment(text).format('YYYY-MM-DD')}</span>
+                <span >{text == '' ? '':moment(text).format('YYYY-MM-DD')}</span>
             </div>),
       }, {
         title: '出发地',
@@ -225,7 +232,7 @@ class OrderList extends React.Component {
         sorter: (a, b) => a.time - b.time,
         render: (text,record) => (
             <div>
-                <span >{moment(text).format('HH:mm')}</span>
+                <span >{text == '' ? '' : moment(text).format('HH:mm')}</span>
             </div>),
       }, {
         title: '检票时间',
@@ -234,7 +241,7 @@ class OrderList extends React.Component {
         sorter: (a, b) => a.time - b.time,
         render: (text,record) => (
             <div>
-                <span >{moment(text).format('HH:mm')}</span>
+                <span >{text == '' ? '' : moment(text).format('HH:mm')}</span>
             </div>),
       }, {
         title: '检票口',
@@ -299,7 +306,7 @@ class OrderList extends React.Component {
         sorter: (a, b) => a.time - b.time,
         render: (text,record) => (
             <div>
-                <span >{moment(text).format('HH:mm')}</span>
+                <span >{text?moment(text).format('HH:mm'):'--'}</span>
             </div>),
       }, {
         title: '客户离开时间',
@@ -332,7 +339,7 @@ class OrderList extends React.Component {
         dataIndex: 'type',
         render: (text,record) => (
             <div>
-                <span >{text == ''?'--':text}</span>
+                <span >{text?text:'无'}</span>
             </div>),
       }, {
         title: '收费价格',
@@ -340,7 +347,7 @@ class OrderList extends React.Component {
         width:90,
         render: (text,record) => (
             <div>
-                <span >{text?text:'--'}</span>
+                <span >{text?text:0}</span>
             </div>),
       }, {
         title: '登记人',

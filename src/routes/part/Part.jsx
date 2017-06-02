@@ -2,7 +2,7 @@ import '../system/system.less'
 
 import React from 'react';
 import { hashHistory } from 'react-router';
-import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Modal,AutoComplete} from 'antd';
+import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete} from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData,access_token} from '../../utils/config';
@@ -13,7 +13,6 @@ const Option = Select.Option;
 const Search = Input.Search;
 const AutoCompleteOption = AutoComplete.Option;
 const msg = '确认删除该员工吗?';
-const url = 'http://192.168.0.147:8888/';
 
 class ServiceList extends React.Component {
     constructor(props) {
@@ -40,7 +39,6 @@ class ServiceList extends React.Component {
         // } else{
         //     hashHistory.push('/login');
         // }
-        this.getInitList(this.state.partListDateCurrent,this.state.partListDatePageSize)
 
     }
     componentDidMount=()=>{
@@ -65,15 +63,16 @@ class ServiceList extends React.Component {
             if (!err) {
                 $.ajax({
                     type: "GET",
-                    url: url+"hsr-role/getRoleList?access_token="+ User.appendAccessToken().access_token,
+                    url: serveUrl + "hsr-role/getRoleList?access_token=" + User.appendAccessToken().access_token,
                     data:{
                         page:page,
                         rows:rows,
                     },
                     success: function(data){
+                        console.log(data)
                         if(data.status == 200){
                             data.data.rows.map((v,index)=>{
-                                v.key = v.employee_id
+                                v.key = v.roleId
                             })
                             _this.setState({
                                 partListDate: data.data.rows,
@@ -94,7 +93,7 @@ class ServiceList extends React.Component {
         });
     }
     //删除确认
-    handleOkDel = () => {
+    handleOkDel = (record) => {
         this.setState({
             visibleDel: false
         });
@@ -103,15 +102,15 @@ class ServiceList extends React.Component {
         $.ajax({
             type: "POST",
             contentType: 'application/json;charset=utf-8',
-            url: url + "hsr-role/deleteRoles?access_token="+User.appendAccessToken().access_token,
+            url: serveUrl + "hsr-role/deleteRoles?access_token=" + User.appendAccessToken().access_token,
             data: JSON.stringify({
-                data: [parseInt(_this.state.roleId)]
+                data: [parseInt(record.roleId)]
             }),
             success: function (data) {
                 if(data.status == 200 ){
-                    message.success(data.msg);
+                    Message.success(data.msg);
                 }else{
-                    message.error(data.msg);
+                    Message.error(data.msg);
                 }
                 _this.getInitList(_this.state.partListDateCurrent,_this.state.partListDatePageSize)
             }
@@ -180,8 +179,8 @@ class ServiceList extends React.Component {
                 return (
                         <div className="order">
                             <span onClick={_this.editPart.bind(_this,record)} className='listRefresh'>编辑</span>
-                            <Popconfirm title="确认删除?" onConfirm={() => _this.showModalDel.bind(_this,record)}>
-                            <span  style={{marginLeft:4}} className='listCancel'>删除</span>
+                            <Popconfirm title="确认删除?" onConfirm={_this.handleOkDel.bind(_this,record)}>
+                                <span  style={{marginLeft:4}} className='listCancel' >删除</span>
                             </Popconfirm>
                         </div>
                         )

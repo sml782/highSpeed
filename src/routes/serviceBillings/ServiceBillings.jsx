@@ -17,7 +17,7 @@ function callback(key) {
   console.log(key);
 }
 
-class Order extends React.Component {
+class ServiceBillings extends React.Component {
     constructor (props) {
         super(props);
         this.state = {
@@ -91,6 +91,6 @@ class Order extends React.Component {
     }
 }
 
-Order = Form.create()(Order)
+ServiceBillings = Form.create()(ServiceBillings)
 
-export default Order
+export default ServiceBillings

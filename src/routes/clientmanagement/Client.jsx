@@ -2,7 +2,7 @@ import './client.less'
 
 import React from 'react';
 import { hashHistory } from 'react-router';
-import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Modal,AutoComplete} from 'antd';
+import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete} from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData} from '../../utils/config';
@@ -15,12 +15,13 @@ const Option = Select.Option;
 const Search = Input.Search;
 const AutoCompleteOption = AutoComplete.Option;
 const msg = '确认删除该员工吗?';
-const url = 'http://192.168.0.147:8888/';
 
 class Client extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            addKey:0,
+            updateKey:0,
             clientListDate: [],
             clientListDateLength:0,
             clientListDateCurrent:1,
@@ -46,7 +47,7 @@ class Client extends React.Component {
             if (!err) {
                 $.ajax({
                     type: "GET",
-                    url: url+"hsr-client/getClientList?access_token="+ User.appendAccessToken().access_token,
+                    url: serveUrl + "hsr-client/getClientList?access_token=" + User.appendAccessToken().access_token,
                     data:{
                         page:page,
                         rows:rows,
@@ -96,21 +97,27 @@ class Client extends React.Component {
             if (!err) {
                 $.ajax({
                     type: "GET",
-                    //url: serveUrl+"/hsr-client/getClientList?access_token="+ User.appendAccessToken().access_token,
-                    url: 'http://192.168.0.147:8888'+"/hsr-client/getClientList?access_token="+ User.appendAccessToken().access_token,
+                    url: serveUrl + "hsr-client/getClientList?access_token=" + User.appendAccessToken().access_token,
                     data:{
                         page:page,
                         rows:rows,
                         },
                     success: function(data){
-                        console
-                        // data.data.rows.map((v,index)=>{
-                        //     v.key = v.employee_id
-                        // })
-                        _this.setState({
-                            clientListDate: data.data.rows,
-                            clientListDateLength:data.data.total
-                        })
+                        console.log(data)
+                        if(data.status == 200 ){
+                            if(data.data != null){
+                                data.data.rows.map((v,index)=>{
+                                    v.key = v.clientId
+                                })
+                                _this.setState({
+                                    clientListDate: data.data.rows,
+                                    clientListDateLength:data.data.total
+                                })
+                            }
+                        }else{
+                            Message.error('客户列表获取失败')
+                        }
+                        
                     }
                 });
             }
@@ -133,17 +140,17 @@ class Client extends React.Component {
         $.ajax({
             type: "POST",
             contentType: 'application/json;charset=utf-8',
-            url: url + "hsr-client/deleteClient?access_token="+User.appendAccessToken().access_token,
+            url: serveUrl + "hsr-client/deleteClient?access_token=" + User.appendAccessToken().access_token,
             data: JSON.stringify({
                 data: [parseInt(_this.state.clientId)]
             }),
             success: function (data) {
                 if(data.status == 200 ){
-                    message.success(data.msg);
+                    Message.success(data.msg);
                     _this.getInitList(_this.state.clientListDateCurrent,_this.state.clientListDatePageSize);
                 }
                 else{
-                    message.error(data.msg);
+                    Message.error(data.msg);
                 }
             }
         });
@@ -159,25 +166,9 @@ class Client extends React.Component {
     showEdit = (record) => {
         this.setState({
             visibleEdit: true,
-            clientId:record.clientId
-        });
-        const _this = this;
-        $.ajax({
-            type: "GET",
-            url: url + "hsr-client/clientView?access_token=" + User.appendAccessToken().access_token,
-            data: {
-                clientId:record.clientId
-            },
-            success: function (data) {
-                if (data.status == 200) {
-                    _this.props.form.setFieldsValue({
-                        name:data.data.name,
-                        type:data.data.type,
-                        ifCheckStr:data.data.ifCheckStr,
-                        ifChargeStr:data.data.ifChargeStr
-                    })
-                }
-            }
+            clientId:record.clientId,
+            addKey:Math.random()*Math.random(),
+            updateKey:Math.random()*Math.random()
         });
         
     }
@@ -202,7 +193,7 @@ class Client extends React.Component {
         }
         $.ajax({
             type: "POST",
-            url: url + "hsr-client/saveOrUpdate?access_token="+User.appendAccessToken().access_token,
+            url: serveUrl + "hsr-client/saveOrUpdate?access_token=" + User.appendAccessToken().access_token,
             contentType: 'application/json;charset=utf-8',
             data: JSON.stringify(formatData),
             success: function (data) {
@@ -299,8 +290,8 @@ class Client extends React.Component {
                 return (
                         <div className="order">
                             <span onClick={_this.showEdit.bind(_this,record)}  className='listRefresh'>编辑</span>
-                           <Popconfirm title="确认删除?" onConfirm={() => _this.showModalDel.bind(_this,record)}>
-                            <span onClick={_this.showModalDel.bind(_this,record)} style={{marginLeft:4}} className='listCancel'>取消</span>
+                           <Popconfirm title="确认删除?" onConfirm={_this.handleOkDel.bind(_this,record)}>
+                                <span onClick={_this.showModalDel.bind(_this,record)} style={{marginLeft:4}} className='listCancel'>删除</span>
                             </Popconfirm>
                         </div>
                         )
@@ -371,39 +362,29 @@ class Client extends React.Component {
                         </div>
                     </Row>
                 </div>
-                <Modal title="警告"
-                    key={Math.random() * Math.random()}
-                    visible={this.state.visibleDel}
-                    onOk={this.handleOkDel}
-                    onCancel={this.handleCancelDel}
-                    >
-                    <div>
-                        <DeleteDialog msg={msg} />
-                    </div>
-                </Modal>
 
                 <div>
                     <Modal title="添加"
-                        key={Math.random() * Math.random()}
+                        key={this.state.addKey}
                         visible={this.state.visibleAdd}
                         onOk={this.handleOk.bind(this)}
                         onCancel={this.handleCancel.bind(this)}
                         >
                         <div>
-                            <AddClient handleAddClick={this.handleAddClick}/>
+                            <AddClient handleCancel={_this.handleCancel.bind(_this)} handleAddClick={this.handleAddClick}/>
                         </div>
                     </Modal>
                 </div>
 
                 <div>
                     <Modal title="编辑"
-                        key={Math.random() * Math.random()}
+                        key={this.state.updateKey}
                         visible={this.state.visibleEdit}
                         onOk={this.handleEditOk.bind(this)}
                         onCancel={this.handleEditCancel.bind(this)}
                         >
                         <div>
-                            <UpdateClient clientId={this.state.clientId} handleEditClick={this.handleEditClick}/>
+                            <UpdateClient handleCancel={_this.handleEditCancel.bind(_this)} clientId={this.state.clientId} handleEditClick={this.handleEditClick}/>
                         </div>
                     </Modal>
                 </div>

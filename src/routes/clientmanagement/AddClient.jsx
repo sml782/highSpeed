@@ -11,7 +11,6 @@ const Option = Select.Option;
 const Search = Input.Search;
 const RadioGroup = Radio.Group;
 const msg = '是否删除?';
-const url = 'http://192.168.0.147:8888/';
 
 class AddClient extends React.Component {
     constructor(props) {
@@ -29,14 +28,21 @@ class AddClient extends React.Component {
         
     }
 
-    componentDidMount=()=>{
-        $(".ant-modal-footer").hide();
+    componentDidMount(){
+        $(".ant-modal-footer").eq(1).remove();
         $(".ant-col-5").removeClass("ant-col-5").addClass("ant-col-7");
         $(".ant-col-19").removeClass("ant-col-19").addClass("ant-col-16");
         $(".ant-modal").css({top:'50%',marginTop:'-168px'});
     }
+
+    handleCancel = () => {
+        this.props.form.resetFields();
+        this.props.handleCancel()
+
+    }
     
     render() {
+        const _this = this
         const { getFieldDecorator } = this.props.form;
         const formItemLayout = {
             labelCol: { span: 5 },
@@ -47,17 +53,15 @@ class AddClient extends React.Component {
             <div>
                  <div className="box">
                     <Form onSubmit={this.handleAddSubmit}>
-                            <FormItem {...formItemLayout} label={(<span>客户姓名&nbsp;</span>)} hasFeedback>
+                            <FormItem {...formItemLayout} label='客户名称' hasFeedback>
                                 {getFieldDecorator('name', {
-                                    rules: [{ message: '请输入客户姓名!', whitespace: true }],
+                                    rules: [{ required:true ,message: '请输入客户名称!', whitespace: true }],
                                 })(
-                                    <Input placeholder="请输入客户姓名" />
+                                    <Input placeholder="请输入客户名称" />
                                     )}
                             </FormItem>
                             <FormItem {...formItemLayout} label="客户类型">
-                                {getFieldDecorator('type', {
-                                    rules: [{ message: '请输入客户类型!' }],
-                                })(
+                                {getFieldDecorator('type', {})(
                                     <Select placeholder="请选择">
                                         <Option value="类型1">类型1</Option>
                                         <Option value="类型2">类型2</Option>
@@ -65,9 +69,7 @@ class AddClient extends React.Component {
                                     )}
                             </FormItem>
                             <FormItem label="是否验证卡号" {...formItemLayout}>
-                                {getFieldDecorator('ifCheckStr', {
-                                    rules: [{ message: '请选择!' }],
-                                })(
+                                {getFieldDecorator('ifCheckStr', {})(
                                     <Select placeholder="请选择">
                                         <Option value="1">是</Option>
                                         <Option value="0">否</Option>
@@ -75,20 +77,19 @@ class AddClient extends React.Component {
                                     )}
                             </FormItem>
                             <FormItem label="是否收费" {...formItemLayout} >
-                                {getFieldDecorator('ifChargeStr', {
-                                    rules: [{ message: '请选择!' }],
-                                })(
+                                {getFieldDecorator('ifChargeStr', {})(
                                     <Select placeholder="请选择">
                                         <Option value="1">是</Option>
                                         <Option value="0">否</Option>
                                     </Select>
                                     )}
                             </FormItem>
-
-                            <Row>
-                                <Col span={24} style={{ textAlign: 'left' }} offset={10}>
-                                    <button className="btn-small" onClick={
-                                        (data)=>{
+                        </Form>
+                        <Row>
+                            <Col span={24} style={{ textAlign: 'left' }}>
+                                <div className="ant-modal-footer">
+                                    <button type="button" className="ant-btn ant-btn-lg" onClick={_this.handleCancel.bind(_this)}><span>取 消</span></button>
+                                    <button type="button" className="ant-btn ant-btn-primary ant-btn-lg" onClick={(data)=>{
                                             this.props.form.validateFields((err, values) => {
                                                 if (!err) {
                                                     //保存表单
@@ -103,7 +104,7 @@ class AddClient extends React.Component {
                                                     };
                                                     $.ajax({
                                                         type: "POST",
-                                                        url: url + "hsr-client/saveOrUpdate?access_token="+User.appendAccessToken().access_token,
+                                                        url: serveUrl + "hsr-client/saveOrUpdate?access_token=" + User.appendAccessToken().access_token,
                                                         contentType: 'application/json;charset=utf-8',
                                                         data: JSON.stringify(formatData),
                                                         success: function (data) {
@@ -116,11 +117,10 @@ class AddClient extends React.Component {
                                                     });
                                                 }
                                             })
-                                        }
-                                    }>保&nbsp;&nbsp;存</button>
-                                </Col>
-                            </Row>
-                        </Form>
+                                        }}><span>确 定</span></button>
+                                </div>
+                            </Col>
+                        </Row>
                  </div>
             </div>
         )

@@ -2,7 +2,7 @@ import './products.less'
 
 import React from 'react';
 import { hashHistory } from 'react-router';
-import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Modal,AutoComplete} from 'antd';
+import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete} from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData, access_token} from '../../utils/config';
@@ -68,23 +68,22 @@ class AddProducts extends React.Component {
                     console.log(values)
                     $.ajax({
                         type: "POST",
-                        //url: serveUrl + "/hsr-product/updateProduct?access_token="+User.appendAccessToken().access_token,
-                        url: 'http://192.168.0.135:8888' + "/hsr-product/updateProduct?access_token="+User.appendAccessToken().access_token,
+                        url: serveUrl + "hsr-product/updateProduct?access_token="+User.appendAccessToken().access_token,
                         data: JSON.stringify({data:values}),      
                         success: function (data) {
                             console.log(data)
                             if(data.status == 200 ){
                                 if(data.data != null){
-                                    message.error(data.data);
+                                    Message.error(data.data);
                                 }else{
-                                    message.success(data.msg);
+                                    Message.success(data.msg);
                                     _this.props.handleCancel(() => {
                                         return false
                                     })
                                     _this.props.form.resetFields()
                                 }
                             }else{
-                                message.error(data.msg);
+                                Message.error(data.msg);
                             }
                             _this.props.getInitList(1,10)
                             }
@@ -137,13 +136,13 @@ class AddProducts extends React.Component {
        
         return (
             <div className="add">
-                <Form onSubmit={this.handleSubmit}>
+                <Form onSubmit={this.handleSubmit} style={{padding:'0px 90px !important'}}>
                     <FormItem
                         {...formI}
                         label="休息室代码"
                     >
                         {getFieldDecorator('productCode', {
-                            rules: [{ required: true, message: '请输入休息室代码!' }],
+                            
                         })(
                             <Input placeholder="请输入休息室代码" />
                         )}
@@ -180,17 +179,17 @@ class AddProducts extends React.Component {
                         )}
                     >
                         {getFieldDecorator('price', {
-                            rules: [{ required: true, message: '请输入零售价格!', pattern: /\d+/g }],
+                            
                         })(
                             <Input placeholder="请输入零售价格" />
                         )}
                     </FormItem>
-                    <div className="ant-modal-footer">
-                        <button type="button" className="ant-btn ant-btn-lg" onClick={this.handleCancel.bind(this)}><span>取 消</span></button>
-                        <button type="button" className="ant-btn ant-btn-primary ant-btn-lg" onClick={_this.handleOk.bind(_this)}><span>确 定</span></button>
-                    </div>
+        
                 </Form>
-                
+                <div className="ant-modal-footer">
+                    <button type="button" className="ant-btn ant-btn-lg" onClick={this.handleCancel.bind(this)}><span>取 消</span></button>
+                    <button type="button" className="ant-btn ant-btn-primary ant-btn-lg" onClick={_this.handleOk.bind(_this)}><span>确 定</span></button>
+                </div>
             </div>
         )
     }

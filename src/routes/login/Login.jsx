@@ -70,7 +70,7 @@ class Login extends React.Component {
                             //获取用户名称
                             $.ajax({
                                 type: "GET",
-                                url: serveUrl+"/hsr-role/getRoleById",
+                                url: serveUrl + "hsr-role/getRoleById",
                                 // url: "http://192.168.0.101:8887/getUserName",
                                 data: { access_token:data.access_token},
                                 success: function (data) {
@@ -118,13 +118,13 @@ class Login extends React.Component {
                 <span className='title-word'>智慧贵宾系统云平台</span>
                 <span className='company-word'>广州风数信息科技有限公司</span>
                 <img src={require('../../assets/images/computer.png')} className='computer-img' />
-                    <Form className="login-form" horizontal onSubmit={this.handleSubmit}>
+                    <Form className="login-form" layout='horizontal' onSubmit={this.handleSubmit}>
                         <FormItem>
                             {getFieldDecorator('userName', {
                                 rules: [{ message: '请输入用户名!' }],
                             })(
                                 <div className="login-input">
-                                    <input className="login-input" id='user' type="text" placeholder="用户名" />
+                                    <input autoComplete='off' className="login-input" id='user' type="text" placeholder="用户名" />
                                 </div>
                                 )}
                         </FormItem>
@@ -133,16 +133,16 @@ class Login extends React.Component {
                                 rules: [{ message: '请输入密码!' }],
                             })(
                                 <div className="login-input">
-                                    <input className="login-input" id='pwd' type="password" placeholder="密码" />
+                                    <input autoComplete='off' className="login-input" id='pwd' type="password" placeholder="密码" />
                                 </div>
                                 )}
                         </FormItem>
                         <section>
-                        <div className="checkboxFour">
-                            <input type="checkbox" value="1" onChange={this.remmberPwd} checked={this.state.remmberPwd} style={{display:'none'}} id="checkboxFourInput" name="" />
-                            <label htmlFor="checkboxFourInput"></label>
-                        </div>
-                        <span style={{display:'inline-block'}} className='remeber-psw'>记住密码</span>
+                            <div className="checkboxFour">
+                                <input type="checkbox" value="1" onChange={this.remmberPwd} checked={this.state.remmberPwd} style={{display:'none'}} id="checkboxFourInput" name="" />
+                                <label htmlFor="checkboxFourInput"></label>
+                            </div>
+                            <span style={{display:'inline-block'}} className='remeber-psw'>记住密码</span>
                         </section>
                         <span className="login-btn" onClick={this.handleSubmit}>登 录</span>
                     </Form>

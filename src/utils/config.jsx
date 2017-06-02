@@ -1,6 +1,7 @@
 //const sign = 'http://testapi.iairportcloud.com/oauth/auth/register';//员工注册地址
 
-const serveUrl = 'http://192.168.0.147:8888'
+//const serveUrl = 'http://192.168.0.147:8888';
+const serveUrl = 'http://101.37.194.157/';//线下测试
 
 const access_token = 'xEa2xk6UMSWHTYzuEijr3IhZOB0avPNV8hYwdU6c'
 const userMsg = {};

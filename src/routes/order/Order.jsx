@@ -4,7 +4,7 @@ import OrderList from './OrderList'
 
 import React from 'react'
 import { hashHistory } from 'react-router'
-import { Breadcrumb, Form, Row, Col, Input, Button, Icon, Select, Popconfirm, message, Table, AutoComplete, Modal, DatePicker } from 'antd'
+import { Breadcrumb, Form, Row, Col, Input, Button, Icon, Select, Popconfirm, Message, Table, AutoComplete, Modal, DatePicker } from 'antd'
 import { Link } from 'react-router'
 import $ from 'jquery'
 import moment from 'moment'
@@ -31,9 +31,10 @@ class Order extends React.Component {
 
     handleSearch = (e) => {
         e.preventDefault();
+        const trainTime =  $('.trainTime').find('.ant-form-item-control-wrapper').find('.ant-calendar-picker-input').val()
         this.props.form.validateFields((err, values) => {
             if(!err){
-                values.queryTrainTime = moment(values.queryTrainTime).format("YYYY-MM-DD")
+                values.queryTrainTime = trainTime == '' ? '' : moment(trainTime).format("YYYY-MM-DD")
                 console.log(values)
                 this.setState({queryValues:values})
             }
@@ -100,10 +101,9 @@ class Order extends React.Component {
                         <Col  {...formCol}>
                             <FormItem
                                 label="高铁日期"
+                                className='trainTime'
                             >
-                                {getFieldDecorator('queryTrainTime', {
-                                    initialValue:moment(new Date(), 'YYYY-MM-DD')
-                                })(
+                                {getFieldDecorator('queryTrainTime', {})(
                                     <DatePicker />
                                 )}
                            </FormItem>

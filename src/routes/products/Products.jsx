@@ -73,8 +73,7 @@ class ServiceList extends React.Component {
             if (!err) {
                 $.ajax({
                     type: "GET",
-                    //url: serveUrl+"/hsr-product/getProductByHsOrId?access_token="+ User.appendAccessToken().access_token,
-                    url: 'http://192.168.0.135:8888'+"/hsr-product/getProductByHsOrId?access_token="+ User.appendAccessToken().access_token,
+                    url: serveUrl + "hsr-product/getProductByHsOrId?access_token=" + User.appendAccessToken().access_token,
                     data:{
                         page:page,
                         rows:rows,
@@ -82,13 +81,23 @@ class ServiceList extends React.Component {
                         },
                     success: function(data){
                         console.log(data)
-                        data.data.rows.map((v,index)=>{
-                            v.key = v.productId
-                        })
-                        _this.setState({
-                            productListDate: data.data.rows,
-                            productListDateLength:data.data.total,
-                        })
+                         if(data.status == 200 ){
+                            if(data.data != null){
+                                data.data.rows.map((v,index)=>{
+                                    v.key = v.productId
+                                })
+                                _this.setState({
+                                    productListDate: data.data.rows,
+                                    productListDateLength:data.data.total,
+                                })
+                                
+                            }else{
+                                
+                            }
+                        }else{
+                            Message.error(data.msg);
+                        }
+                        
                     }
                 });
             }
@@ -126,8 +135,7 @@ class ServiceList extends React.Component {
         const _this = this
         $.ajax({
             type: "POST",
-            //url: serveUrl + "/hsr-product/deleteProduct?access_token="+User.appendAccessToken().access_token,
-            url: 'http://192.168.0.135:8888' + "/hsr-product/deleteProduct?access_token="+User.appendAccessToken().access_token,
+            url: serveUrl + "hsr-product/deleteProduct?access_token="+User.appendAccessToken().access_token,
             data:{
                     productId: record.productId
                 },      
@@ -300,33 +308,38 @@ class ServiceList extends React.Component {
                 </div>
 
                  <div className="box">
-                    
                     <Row>
-                        <div className='btn-add' style={{marginLeft:'87%'}} onClick={_this.showAdd.bind(_this)}><span>添加休息室</span><img src={require('../../assets/images/add.png')} className='addImg'/></div>
-                        <div className="pro-search">
+                        <Col span={13}>
+                            <div className="pro-search">
 
-                            <Form onSubmit={this.handleSubmit}>
-                                <Row>
-                                    <Col span={6}>
-                                        <FormItem
-                                            {...formI}
-                                            label="休息室代码(或高铁站名称)"
-                                        >
-                                            {getFieldDecorator('search', {})(
-                                                <Input placeholder="请输入休息室代码" />
-                                            )}
-                                        </FormItem>
-                                    </Col>
-                                    <Col span={8}>
-                                        <div className='btn-search' onClick={_this.searchProduct.bind(_this)} ><span>搜索</span><img src={require('../../assets/images/search.png')} className='addImg'/></div>
-                                    </Col>
-                                </Row>
-                            </Form>
-                        </div>
-                        <div className="search-result-list" >
-                            <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={_this.state.productListDate}  className="serveTable"/>
-                         </div>
+                                <Form onSubmit={this.handleSubmit}>
+                                    <Row>
+                                        <Col span={18}>
+                                            <FormItem
+                                                labelCol={{span:24}}
+                                                label="休息室代码(或高铁站名称)"
+                                                className="pro-search"
+                                            >
+                                                {getFieldDecorator('search', {})(
+                                                    <Input />
+                                                )}
+                                            </FormItem>
+                                        </Col>
+                                        <Col span={6}>
+                                            <div className='btn-search' onClick={_this.searchProduct.bind(_this)} ><span>搜索</span><img src={require('../../assets/images/search.png')} className='addImg'/></div>
+                                        </Col>
+                                    </Row>
+                                </Form>
+                            </div>
+                        </Col>
+                        <Col span={10} style={{float:'right'}}>
+                            <div className='btn-add' style={{marginLeft:'72%'}} onClick={_this.showAdd.bind(_this)}><span>添加休息室</span><img src={require('../../assets/images/add.png')} className='addImg'/></div>
+                        </Col>
                     </Row>
+                    <div className="search-result-list" >
+                        <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={_this.state.productListDate}  className="serveTable"/>
+                    </div>
+                        
                  </div>
                  <Modal title="警告"
                      key={Math.random() * Math.random()}

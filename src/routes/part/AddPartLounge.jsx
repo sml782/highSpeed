@@ -12,7 +12,6 @@ const Option = Select.Option;
 const Search = Input.Search;
 const AutoCompleteOption = AutoComplete.Option;
 const msg = '是否删除?';
-const url = 'http://192.168.0.135:8888/';
 
 class AddPartLounge extends React.Component {
     constructor(props) {
@@ -38,7 +37,7 @@ class AddPartLounge extends React.Component {
         const _this = this;
         $.ajax({
             type: "GET",
-            url: url + "hsr-order/getTrainStationDropdownList",
+            url: serveUrl + "hsr-order/getTrainStationDropdownList",
             data: {access_token: User.appendAccessToken().access_token},
             success: function (data) {
                 if (data.status == 200) {
@@ -55,7 +54,6 @@ class AddPartLounge extends React.Component {
     }
     componentDidMount () {
         $('.add-lounges').parent().parent().parent().find('.ant-modal-footer').eq(1).remove()
-        $(".ant-modal-footer").hide();
         $(".ant-input ant-input ant-select-search__field").css({width:300});
     }
 
@@ -68,14 +66,14 @@ class AddPartLounge extends React.Component {
         const _this = this;
         $.ajax({
             type: "GET",
-            url: url + "hsr-order/getTrainStationDropdownList",
+            url: serveUrl + "hsr-order/getTrainStationDropdownList",
             data: { access_token: User.appendAccessToken().access_token,name:e},
             success: function(data) {
                 if (data.status == 200) {
                     if(data.data.length == 1){
                         $.ajax({
                             type: "GET",
-                            url: url + "hsr-product/getProductByHsOrId",
+                            url: serveUrl + "hsr-product/getProductByHsOrId",
                             data: {access_token: User.appendAccessToken().access_token,data:_this.props.form.getFieldValue('stationName').toString()},
                             success: function (data) {
                                 if (data.status == 200) {
@@ -92,6 +90,12 @@ class AddPartLounge extends React.Component {
                 }
             }
         });
+    }
+
+    //取消
+    handleCancle = () => {
+        this.props.form.resetFields()
+        this.props.addCancle()
     }
 
     render() {
@@ -131,9 +135,13 @@ class AddPartLounge extends React.Component {
                         )}
                     </FormItem>
                     
-                    <Row>
-                        <Col span={24} style={{ textAlign: 'left' }} offset={10}>
-                            <button className="btn-small" onClick={
+                    
+                </Form>
+                <Row>
+                    <Col span={24} style={{ textAlign: 'left' }} >
+                        <div className="ant-modal-footer addp">
+                            <button type="button" className="ant-btn ant-btn-lg" onClick={_this.handleCancle.bind(_this)}><span>取 消</span></button>
+                            <button type="button" className="ant-btn ant-btn-primary ant-btn-lg" onClick={
                                 (data)=>{
                                     this.props.form.validateFields((err, values) => {
                                         if (!err) {
@@ -147,11 +155,10 @@ class AddPartLounge extends React.Component {
                                             this.props.addProduct(dataSource);
                                         }
                                     })
-                                }
-                            }>保&nbsp;&nbsp;存</button>
-                        </Col>
-                    </Row>
-                </Form>
+                                }}><span>确 定</span></button>
+                        </div>
+                    </Col>
+                </Row>
             </div>
         )
     }

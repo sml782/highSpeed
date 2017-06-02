@@ -38,7 +38,7 @@ import Products from './routes/products/Products'
 export default (
     <Router history={hashHistory}>
         <Route path="/" component={SiderBar}>
-            <IndexRoute component={Login} />
+            <IndexRoute component={Order} />
             <Route path="order" component={Order} />
             <Route path="addAppointment" component={AddAppointment} />
             <Route path="updateAppointment(/:orderId)" component={UpdateAppointment} />

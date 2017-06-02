@@ -12,7 +12,7 @@ class SiderBar extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            current: '1',
+            current: '0',
             roleId: 1,
             username:undefined,
             status:true,
@@ -37,7 +37,7 @@ class SiderBar extends React.Component {
         const _this = this
         $.ajax({
             type: "GET",
-            url: serveUrl+"/hsr-role/getMenuByRoleId?access_token="+ User.appendAccessToken().access_token,
+            url: serveUrl+"hsr-role/getMenuByRoleId?access_token="+ User.appendAccessToken().access_token,
             data:{roleId:'1'},
             success: function(data){
                 _this.setState({
@@ -57,6 +57,35 @@ class SiderBar extends React.Component {
 
     componentDidMount() {
         this.getUser()
+    }
+
+    changeMenu = (v,i,s) => {
+        console.log(v,i,s)
+    }
+
+    loginOut = () =>{
+        const _this = this
+        $.ajax({
+            type: "GET",
+            url: serveUrl + 'guest-order/getAirportCode?access_token=' + User.appendAccessToken().access_token,
+            success: function(data){
+                let url;
+                if(data.data.airportCode == 'SHA'){
+                    url = '/login'+data.data.airportCode;
+                    _this.setState({
+                        png:1
+                    })
+                }else{
+                    url = '/login';
+                    _this.setState({
+                        png:0
+                    })
+                
+                }
+                User.logout();
+                hashHistory.push(url);
+            }
+        })
     }
 
     getUser = () => {
@@ -80,6 +109,7 @@ class SiderBar extends React.Component {
                         style={{ width: 185 }}
                         defaultOpenKeys={['sub1', 'sub2']}
                         defaultSelectedKeys={[this.state.current]}
+                        onSelect={this.changeMenu}
                         mode="inline"
                     >
                        {MenuOption}
@@ -88,7 +118,7 @@ class SiderBar extends React.Component {
                 <div id="rightWrap">
                     <Menu mode="horizontal">
                         <SubMenu title={<span><Icon type="user" />{ this.state.username }</span>}>
-                            <Menu.Item key="setting:1" id='logout'><img className='logoutList' src={require('../assets/images/logout.png')}/><span id='logoutWord'>退出登录</span></Menu.Item>
+                            <Menu.Item key="setting:1" id='logout' onClick={this.loginOut}><img className='logoutList' src={require('../assets/images/logout.png')}/><span id='logoutWord'>退出登录</span></Menu.Item>
                         </SubMenu>
                     </Menu>
                     <div className="right-box">

@@ -15,7 +15,7 @@ const Search = Input.Search;
 const AutoCompleteOption = AutoComplete.Option;
 const msg = '确认删除该员工吗?';
 
-class AddEmployee extends React.Component {
+class UpdateEmployee extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -46,6 +46,14 @@ class AddEmployee extends React.Component {
     componentDidMount(){
         console.log(this.props)
         $('.ant-modal-footer').eq(1).remove()
+        const handleData = this.props.handleData
+        this.props.form.setFieldsValue({
+            name:handleData.name,
+            phone:handleData.phone,
+            sex:handleData.sex.toString(),
+            trainStationName:handleData.trainStationName,
+        })
+        this.setState({returnData:handleData})
     }
 
 
@@ -81,36 +89,41 @@ class AddEmployee extends React.Component {
         var employeeList, arr = [], returnData;
         this.props.form.validateFields((err, values) => {
             if(!err){
-                let arr = values.trainStationName.split('&')
-                if(arr.length > 1){
-                    values.trainStationName = arr[1]
-                    values.trainStationId = arr[0]
-                    values.sex = parseInt(values.sex)
-                    console.log(values)
-                    $.ajax({
-                        type: "POST",
-                        contentType: 'application/json;charset=utf-8',
-                        url: serveUrl + "hsr-role/saveOrUpdateEmployee?access_token=" + User.appendAccessToken().access_token,
-                        data: JSON.stringify({
-                                data:values
-                            }),      
-                        success: function (data) {
-                            if(data.status == 200 ){
-                                if(data.data != null){
-                                    Message.error(data.data);
-                                }else{
-                                    Message.success(data.msg);
-                                    _this.props.handleOk()  
-                                }
-                            }else{
-                                Message.error(data.msg);
-                            }
-                        }
-                    })
+                if(values.trainStationName == _this.props.handleData.trainStationName){
+                    values.trainStationName = _this.props.handleData.trainStationName
+                    values.trainStationId = _this.props.handleData.trainStationId
                 }else{
-                    Message.error('请输入正确的高铁站');
+                    let arr = values.trainStationName.split('&')
+                    if(arr.length > 1){
+                        values.trainStationName = arr[1]
+                        values.trainStationId = arr[0]
+                        values.sex = parseInt(values.sex)
+                        values.employeeId = _this.props.handleData.employee_id
+                        console.log(values)
+                        $.ajax({
+                            type: "POST",
+                            contentType: 'application/json;charset=utf-8',
+                            url: serveUrl + "hsr-role/saveOrUpdateEmployee?access_token=" + User.appendAccessToken().access_token,
+                            data: JSON.stringify({
+                                    data:values
+                                }),      
+                            success: function (data) {
+                                if(data.status == 200 ){
+                                    if(data.data != null){
+                                        Message.error(data.data);
+                                    }else{
+                                        Message.success(data.msg);
+                                        _this.props.handleOk()  
+                                    }
+                                }else{
+                                    Message.error(data.msg);
+                                }
+                            }
+                        })
+                    }else{
+                        Message.error('请输入正确的高铁站');
+                    }
                 }
-                
                 
             }
         })
@@ -183,7 +196,7 @@ class AddEmployee extends React.Component {
                         label="手机号码"
                     >
                         {getFieldDecorator('phone', {
-                            rules: [{ required: true, message: '请输入手机号!', pattern:/^1[3|4|5|7|8][0-9]\d{4,8}$/gi }],
+                            rules: [{ required: true, message: '请输入手机号!', pattern:/^1[3|4|5|7|8][0-9]\d{4,8}$/ }],
                         })(
                             <Input placeholder="请输入手机号" />
                         )}
@@ -213,6 +226,6 @@ class AddEmployee extends React.Component {
     }
 }
 
-AddEmployee = Form.create()(AddEmployee);
+UpdateEmployee = Form.create()(UpdateEmployee);
 
-export default AddEmployee;
+export default UpdateEmployee;

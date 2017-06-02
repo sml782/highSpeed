@@ -15,7 +15,7 @@ columns[0] = [{
   dataIndex: 'trainTime',
   width:130,
   render(text,record) {
-      return <span>{moment(record.trainTime).format('YYYY-MM-DD HH:MM')}</span>
+      return <span>{text == '' ? '--':moment(text).format('YYYY-MM-DD')}</span>
   }
 }, {
   title: '高铁车站',
@@ -27,27 +27,27 @@ columns[0] = [{
   width:130,
 }, {
   title: '客户名称1',
-  dataIndex: 'name1',
+  dataIndex: 'client1',
   width:110,
 }, {
-  title: '服务人次',
-  dataIndex: 'degree1',
+  title: '服务人次1',
+  dataIndex: 'serverNum1',
   width:110,
 }, {
   title: '客户名称2',
-  dataIndex: 'name2',
+  dataIndex: 'client2',
   width:110,
 }, {
-  title: '服务次数',
-  dataIndex: 'degree2',
+  title: '服务次数2',
+  dataIndex: 'serverNum2',
   width:110,
 }, {
   title: '客户名称3',
-  dataIndex: 'name3',
+  dataIndex: 'client3',
   width:110,
 }, {
-  title: '服务次数',
-  dataIndex: 'degree3',
+  title: '服务次数3',
+  dataIndex: 'serverNum3',
   width:110,
 }, {
   title: '接待统计',
@@ -72,7 +72,7 @@ columns[1] = [{
   dataIndex: 'date',
   width:130,
   render(text,record) {
-      return <span>{record.train.trainTime}</span>
+      return <span>{moment(record.train.trainTime).format('YYYY-MM-DD')}</span>
   }
 }, {
   title: '休息室名称',
@@ -83,8 +83,12 @@ columns[1] = [{
   dataIndex: 'clientName',
   width:110,
 }, {
+  title: '卡号',
+  dataIndex: 'thirdPartCode',
+  width:130,
+}, {
   title: '旅客姓名',
-  dataIndex: 'passengerName',
+  dataIndex: 'travellerName',
   width:110,
   render(text,record) {
       let text1 = ''
@@ -99,35 +103,35 @@ columns[1] = [{
   }
 }, {
   title: '车次',
-  dataIndex: 'trainNo',
+  dataIndex: 'trainCode',
   width:110,
     render(text,record) {
       return <span>{record.train.trainCode}</span>
   }
 }, {
   title: '出发地',
-  dataIndex: 'departure',
+  dataIndex: 'startPlace',
   width:110,
   render(text,record) {
       return <span>{record.train.startPlace}</span>
   }
 }, {
   title: '目的地',
-  dataIndex: 'destination',
+  dataIndex: 'destinationPlace',
   width:110,
     render(text,record) {
       return <span>{record.train.destinationPlace}</span>
   }
 }, {
   title: '开车时间',
-  dataIndex: 'drivingTime',
+  dataIndex: 'startTime',
   width:130,
   render(text,record) {
       return <span>{moment(record.train.startTime).format('MM-DD HH:mm')}</span>
   }
 }, {
   title: '检票时间',
-  dataIndex: 'checkinTime',
+  dataIndex: 'checkTime',
   width:100,
      render(text,record) {
       return <span>{moment(record.train.checkTime).format('MM-DD HH:mm')}</span>
@@ -150,10 +154,6 @@ columns[1] = [{
   title: '休息时长',
   dataIndex: 'restTime',
   width:130,
-}, {
-  title: '卡号',
-  dataIndex: 'cartNo',
-  width:130,
 }]
 
 columns[2] = [{
@@ -161,7 +161,7 @@ columns[2] = [{
   dataIndex: 'trainTime',
   width:130,
   render(text,record) {
-      return <span>{moment(record.trainTime).format('YYYY-MM-DD HH:mm')}</span>
+      return <span>{moment(record.trainTime).format('YYYY-MM-DD')}</span>
   }
 }, {
   title: '高铁车站',
@@ -173,59 +173,59 @@ columns[2] = [{
   width:130,
 }, {
   title: '刷卡人次',
-  dataIndex: 'name1',
+  dataIndex: 'slotNum',
   width:110,
   render(text,record) {
       let text1=''
       record.consumeList.map((v,index)=>{
         if(v.type=='2'){
-          text1=v.num
+          text1 = v.num
         }
       })
       return <span>{text1}</span>
   }
 }, {
   title: '刷卡金额',
-  dataIndex: 'degree1',
+  dataIndex: 'slotPrice',
   width:110,
   render(text,record) {
       let text1=''
       record.consumeList.map((v,index)=>{
         if(v.type=='2'){
-          text1=v.acount
+          text1 = v.acount
         }
       })
       return <span>{text1}</span>
   }
 }, {
   title: '现金人次',
-  dataIndex: 'name2',
+  dataIndex: 'cashNum',
   width:110,
   render(text,record) {
       let text1=''
       record.consumeList.map((v,index)=>{
         if(v.type=='3'){
-          text1=v.num
+          text1 = v.num
         }
       })
       return <span>{text1}</span>
   }
 }, {
   title: '现金金额',
-  dataIndex: 'degree2',
+  dataIndex: 'cashPrice',
   width:110,
   render(text,record) {
       let text1=''
       record.consumeList.map((v,index)=>{
         if(v.type=='3'){
-          text1=v.acount
+          text1 = v.acount
         }
       })
       return <span>{text1}</span>
   }
 }, {
   title: '网络人次',
-  dataIndex: 'name3',
+  dataIndex: 'netNum',
   width:110,
   render(text,record) {
       let text1=''
@@ -238,7 +238,7 @@ columns[2] = [{
   }
 }, {
   title: '网络金额',
-  dataIndex: 'degree3',
+  dataIndex: 'netPrice',
   width:110,
   render(text,record) {
       let text1=''
@@ -268,7 +268,7 @@ const rowSelection = {
   }),
 };
 
-class OrderList extends React.Component {
+class ServiceList extends React.Component {
     constructor (props) {
         super(props);
         this.state = {
@@ -280,6 +280,8 @@ class OrderList extends React.Component {
             rows:10,
             billList:[],
             flag:1,
+            columnsStart:[],
+            columnsEnd:[],
         }
     }
 
@@ -291,15 +293,17 @@ class OrderList extends React.Component {
         if(key*1 == 2){
             this.setState({
               scrollX:"150%",
-              url:'/hsr-order/getDetailBill'
+              url:'hsr-order/getDetailBill'
           })
         }else if(key*1 == 1){
             this.setState({
-              url:'/hsr-order/getCountBill'
+              url:'hsr-order/getCountBill',
+              columnsStart:columns[0].slice(0,3),
+              columnsEnd:columns[0].pop(),
             })
         }else if(key*1 == 3){
             this.setState({
-              url:'/hsr-order/getRetailBill'
+              url:'hsr-order/getRetailBill'
             })
         }
         
@@ -319,26 +323,54 @@ class OrderList extends React.Component {
         this.getInitList(this.state.page,this.state.rows)
     }
 
-    getInitList (page,rows){
+    componentWillReceiveProps (values) {
+        this.getInitList(this.state.page,this.state.rows,this.props.searchData,values.searchData)
+        
+    }
+  
+    getInitList (page,rows,value){
         const _this = this;
-          $.ajax({
-              type: "GET",
-              //url: serveUrl+"/hsr-role/getEmployeeById?access_token="+ User.appendAccessToken().access_token,
-              url:'http://192.168.0.135:8888'+_this.state.url+'?access_token='+ User.appendAccessToken().access_token,
-              data:{
-                  page:page,
-                  rows:rows,
-                  },
-              success: function(data){
-                  console.log(data)
-                  data.data.rows.map((v,index)=>{
-                      v.key = index
-                  })
-                  _this.setState({
-                      billList: data.data.rows
-                  })
-              }
-          });
+        const data = $.extend({page:page,rows:rows},value)
+        console.log(data)
+        $.ajax({
+            type: "GET",
+            url:serveUrl + _this.state.url + '?access_token=' + User.appendAccessToken().access_token,
+            data:data,
+            success: function(data){
+                if(data.status == 200){
+                    if(_this.state.url == 'hsr-order/getCountBill'){
+                        const columnsStart = _this.state.columnsStart
+                        const columnsEnd = _this.state.columnsEnd
+                        var column = [].concat(columnsStart)
+                        for(var i = 0;i < data.data.columnLength;i++){
+                            column.push({
+                                title: `客户名称${i+1}`,
+                                dataIndex: `client${i+1}`,
+                                width:110,
+                            })
+                            column.push({
+                                title: `服务人次${i+1}`,
+                                dataIndex: `serverNum${i+1}`,
+                                width:110,
+                            })
+                        }
+                        column = column.concat(columnsEnd)
+                        _this.setState({
+                            scrollX:data.data.columnLength?`${80+data.data.columnLength*10}%`:'100%',
+                            column:column
+                        })
+                    }
+                    console.log(data)
+                    data.data.rows.map((v,index)=>{
+                        v.key = index
+                    })
+                    _this.setState({
+                        billList: data.data.rows,
+                    })
+                }
+                
+            }
+        });
       }
     showTotal(total) {
       return `共 ${total} 条`;
@@ -357,4 +389,4 @@ class OrderList extends React.Component {
     }
 }
 
-export default OrderList
+export default ServiceList

@@ -1,7 +1,7 @@
 import './part.less';
 import React from 'react';
 import { hashHistory } from 'react-router';
-import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Tree,Modal,TreeSelect} from 'antd';
+import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Tree,Modal,TreeSelect} from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData, access_token } from '../../utils/config';
@@ -14,7 +14,6 @@ const Search = Input.Search;
 const msg = '是否删除?';
 const TreeNode = Tree.TreeNode;
 const SHOW_PARENT = TreeSelect.SHOW_PARENT;
-const url = 'http://192.168.0.147:8888/';
 
 function removeByValue(arr, val) {
   for(var i=0; i<arr.length; i++) {
@@ -66,18 +65,18 @@ class Editpart extends React.Component {
         // } else{
         //     hashHistory.push('/login');
         // }
-        this.getInit();
+        
     }
     componentDidMount=()=>{
         $(".ant-modal-footer").hide();
         $(".ant-breadcrumb-separator").html(">");
         $(".ant-breadcrumb-separator").css({color:'#333'});
-
+        this.getInit();
         //获取角色详情
         const _this = this;
         $.ajax({
             type: "GET",
-            url: url + "hsr-role/getRoleById",
+            url: serveUrl + "hsr-role/getRoleById",
             data: { access_token: User.appendAccessToken().access_token, roleId: _this.props.params.roleId },
             success: function(data) {
                 if (data.status == 200) {
@@ -119,7 +118,7 @@ class Editpart extends React.Component {
         const _this = this
         $.ajax({
             type: "GET",
-            url: url + "hsr-role/getMenuByRoleId?access_token=" + User.appendAccessToken().access_token,
+            url: serveUrl + "hsr-role/menuTree?access_token=" + User.appendAccessToken().access_token,
             contentType:'application/json;charset=utf-8',
             data:{
                 roleId:1
@@ -230,16 +229,15 @@ class Editpart extends React.Component {
                 $.ajax({
                     type: "POST",
                     contentType:'application/json;charset=utf-8',
-                    url: serveUrl+"/hsr-role/saveOrUpdateRole?access_token="+ User.appendAccessToken().access_token,
-                    //url: serveUrl+"/hsr-role/saveOrUpdateRole?access_token="+ access_token,
+                    url: serveUrl + "hsr-role/saveOrUpdateRole?access_token=" + User.appendAccessToken().access_token,
                     data: JSON.stringify(formData),
                     success: function(data){
                         if(data.status == 200){
-                            message.success(data.msg);
+                            Message.success(data.msg);
                             hashHistory.push('/system');
                         }
                         else{
-                            message.error(data.msg);
+                            Message.error(data.msg);
                         }
                     }
                 });
@@ -304,7 +302,7 @@ class Editpart extends React.Component {
                     <div className="top-bar"></div>
                     <div className="breadcrumb">
                         <Breadcrumb>
-                            <Breadcrumb.Item>新增角色</Breadcrumb.Item>tem>
+                            <Breadcrumb.Item>修改角色</Breadcrumb.Item>
                         </Breadcrumb>
                     </div>
                 </div>

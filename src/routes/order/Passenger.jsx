@@ -25,7 +25,8 @@ class Passenger extends React.Component {
 
     componentDidMount () {
         //TODO AJAX
-        $('.addp').parent().parent().parent().next('.ant-modal-footer').remove()
+        //console.log($('.addp').parent().parent())
+        $('.addp').parent().parent().next('.ant-modal-footer').remove()
         const values = this.props.values
         if(values.travellerName){
              this.props.form.setFieldsValue({
@@ -80,7 +81,7 @@ class Passenger extends React.Component {
 
         return (
             <div className='passenger'>
-                <Form layout={'inline'} onSubmit={_this.handleSubmit.bind(_this)}>
+                <Form layout={'inline'} style={{margin:'0px 16px'}} onSubmit={_this.handleSubmit.bind(_this)}>
        
                             <FormItem
                                 label="旅客姓名"
@@ -101,7 +102,7 @@ class Passenger extends React.Component {
                             >
                                 {getFieldDecorator('phoneNumber', {
                                     rules: [{
-                                        message: '请输入手机号!',
+                                        required:true, pattern:/^1[3|4|5|7|8][0-9]\d{4,8}$/gi, message: '请输入手机号!',
                                     }],
                                 })(
                                     <Input />
@@ -134,12 +135,12 @@ class Passenger extends React.Component {
                                 )}
                             </FormItem>
             
-                    <div className="ant-modal-footer addp">
-                        <button type="button" className="ant-btn ant-btn-lg" onClick={_this.addCancel.bind(_this)}><span>取 消</span></button>
-                        <button type="button" className="ant-btn ant-btn-primary ant-btn-lg" onClick={_this.addPassenger.bind(_this)}><span>确 定</span></button>
-                    </div>
+                    
                 </Form>
-                
+                <div className="ant-modal-footer addp">
+                    <button type="button" className="ant-btn ant-btn-lg" onClick={_this.addCancel.bind(_this)}><span>取 消</span></button>
+                    <button type="button" className="ant-btn ant-btn-primary ant-btn-lg" onClick={_this.addPassenger.bind(_this)}><span>确 定</span></button>
+                </div>
             </div>
             
         )

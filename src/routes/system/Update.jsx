@@ -62,7 +62,7 @@ class AddPart extends React.Component {
         if(this.props.params.roleId){
             $.ajax({
                 type: "GET",
-                url: serveUrl+"/hsr-role/getRoleById?access_token="+ User.appendAccessToken().access_token,
+                url: serveUrl + "hsr-role/getRoleById?access_token=" + User.appendAccessToken().access_token,
                 contentType: 'application/json;charset=utf-8',
                 data:JSON.stringify({
                     roleId:this.props.params.roleId
@@ -179,7 +179,7 @@ class AddPart extends React.Component {
                         $.ajax({
                             type: "POST",
                             contentType: 'application/json;charset=utf-8',
-                            url: serveUrl + "/hsr-role/saveOrUpdateRole?access_token="+User.appendAccessToken().access_token,
+                            url: serveUrl + "hsr-role/saveOrUpdateRole?access_token=" + User.appendAccessToken().access_token,
                             data: JSON.stringify({
                                     data:values
                                 }),      
@@ -222,8 +222,7 @@ class AddPart extends React.Component {
         //                     $.ajax({
         //                         type: "POST",
         //                         contentType: 'application/json;charset=utf-8',
-        //                         // url: "http://192.168.1.199:8887/saveOrUpdate?access_token=" + User.appendAccessToken().access_token,
-        //                         url: serveUrl+"/hsr-role/saveOrUpdateRole?access_token="+ User.appendAccessToken().access_token,
+        //                         url: serveUrl+"hsr-role/saveOrUpdateRole?access_token="+ User.appendAccessToken().access_token,
         //                         data: JSON.stringify(formData1),
         //                         success: function (data) {
         //                             if (data.status == 200) {

@@ -97,8 +97,7 @@ class UpdateProducts extends React.Component {
                     console.log(values)
                     $.ajax({
                         type: "POST",
-                        //url: serveUrl + "/hsr-product/updateProduct?access_token="+User.appendAccessToken().access_token,
-                        url: 'http://192.168.0.135:8888' + "/hsr-product/updateProduct?access_token="+User.appendAccessToken().access_token,
+                        url: serveUrl + "hsr-product/updateProduct?access_token=" + User.appendAccessToken().access_token,
                         data: JSON.stringify({data:values}),      
                         success: function (data) {
                             console.log(data)
@@ -172,7 +171,7 @@ class UpdateProducts extends React.Component {
                         label="休息室代码"
                     >
                         {getFieldDecorator('productCode', {
-                            rules: [{ required: true, message: '请输入休息室代码!' }],
+                            
                         })(
                             <Input placeholder="请输入休息室代码" />
                         )}
@@ -209,17 +208,17 @@ class UpdateProducts extends React.Component {
                         )}
                     >
                         {getFieldDecorator('price', {
-                            rules: [{ required: true, message: '请输入零售价格!', pattern: /\d+/g }],
+                            
                         })(
                             <Input placeholder="请输入零售价格" />
                         )}
                     </FormItem>
-                    <div className="ant-modal-footer">
-                        <button type="button" className="ant-btn ant-btn-lg" onClick={this.handleCancel.bind(this)}><span>取 消</span></button>
-                        <button type="button" className="ant-btn ant-btn-primary ant-btn-lg" onClick={_this.handleOk.bind(_this)}><span>确 定</span></button>
-                    </div>
+                   
                 </Form>
-                
+                <div className="ant-modal-footer">
+                    <button type="button" className="ant-btn ant-btn-lg" onClick={this.handleCancel.bind(this)}><span>取 消</span></button>
+                    <button type="button" className="ant-btn ant-btn-primary ant-btn-lg" onClick={_this.handleOk.bind(_this)}><span>确 定</span></button>
+                </div>
             </div>
         )
     }

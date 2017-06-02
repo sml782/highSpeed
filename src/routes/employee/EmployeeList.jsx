@@ -1,8 +1,11 @@
 import './employee.less'
 
+import AddEmployee from './AddEmployee'
+import UpdateEmployee from './UpdateEmplayee'
+
 import React from 'react';
 import { hashHistory } from 'react-router';
-import { Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Modal,AutoComplete } from 'antd';
+import { Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete } from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import DeleteDialog from '../DeleteDialog';//引入删除弹框
@@ -30,7 +33,9 @@ class ServiceList extends React.Component {
             selectedRowKeys: [],
             visibleDel:false,
             addKey:0,
+            updateKey:10,
             visibleAdd:false,
+            visibleUpdate:false,
             trainStationResult:[],
             trainStation:[],
             returnData:null,
@@ -70,39 +75,30 @@ class ServiceList extends React.Component {
         const _this = this;
         $.ajax({
             type: "GET",
-            url: serveUrl+"/hsr-role/getEmployeeList?access_token="+ User.appendAccessToken().access_token,
-            //url:'http://192.168.0.147:8888/hsr-role/getEmployeeList?access_token=Y7NeYTS9nqcZuAe654lt1WDKhj4V56xUEMrPqWF0',
+            url: serveUrl + "hsr-role/getEmployeeList?access_token=" + User.appendAccessToken().access_token,
             data:{
                 page:page,
                 rows:rows,
                 },
             success: function(data){
                 console.log(data)
-                //this.setState({employeeList:data,employeeListLength:data.length})
-                data.data.rows.map((v,index)=>{
-                    v.key = v.employee_id
-                })
+                if(data.status == 200 ){
+                    if(data.data != null){
+                        data.data.rows.map((v,index)=>{
+                            v.key = v.employee_id
+                        })
 
-                _this.setState({
-                    employeeList: data.data.rows,
-                    employeeListLength:data.data.total
-                })
+                        _this.setState({
+                            employeeList: data.data.rows,
+                            employeeListLength:data.data.total
+                        })
+                    }
+                }else{
+                    Message.error('获取员工列表失败')
+                }
+                
             }
         });
-    }
-
-    //获取高铁站
-    handleStationChange = (value) => {
-        const _this = this
-        if(value !== ''){
-            getTrainStation(value,(station) => {
-                const trainStation = station.map((s) => {
-                     const key = s.no +'&'+s.value
-                    return <AutoCompleteOption key={key}>{s.value}</AutoCompleteOption>;
-                })
-                _this.setState({ trainStation: trainStation})
-            })
-        }
     }
 
     //删除弹框
@@ -114,103 +110,71 @@ class ServiceList extends React.Component {
         });
     }
     //删除确认
-    handleOkDel = (value) => {
+    handleOkDel = (record) => {
         const _this = this
+        console.log(record)
         $.ajax({
             type: "POST",
             contentType: 'application/json;charset=utf-8',
-            url: serveUrl + "/hsr-role/deleteEmployee?access_token="+User.appendAccessToken().access_token,
-            //url:'http://192.168.0.147:8888/hsr-role/deleteEmployee?access_token=Y7NeYTS9nqcZuAe654lt1WDKhj4V56xUEMrPqWF0',
+            url: serveUrl + "hsr-role/deleteEmployee?access_token=" + User.appendAccessToken().access_token,
             data: JSON.stringify({
-                data: [parseInt(value.employee_id)]
+                data: [parseInt(record.employee_id)]
             }),
             success: function (data) {
                 if(data.status == 200 ){
                     if(data.data != null){
-                        message.error(data.data);
+                        Message.error(data.data);
                     }else{
-                        message.success(data.msg);
-                        _this.getInitList(_this.state.employeeCurrent,_this.state.employeePageSize)
+                        Message.success(data.msg);
+                        
                     }
                 }else{
-                    message.error(data.msg);
+                    Message.error(data.msg);
                 }
                 _this.setState({
                     visibleDel: false
                 });
+                _this.getInitList(_this.state.employeeCurrent,_this.state.employeePageSize)
             }
         });
     }
-    //添加/修改员工
-    addEmployeeBtn=(record)=>{
+    //添加员工
+    addEmployeeBtn=()=>{
         this.setState({ visibleAdd: true,addKey:Math.random() * Math.random() })
+    }
+
+
+    //添加确认
+    handleOk(){
+        this.setState({ visibleAdd: false})
+        this.getInitList(this.state.employeeCurrent,this.state.employeePageSize)
+    }
+
+    //取消添加
+    handleCancel(){
+        this.setState({visibleAdd:false, }) 
+    }
+
+    //修改员工
+    updateEmployeeBtn=(record)=>{
+        this.setState({ visibleUpdate: true,updateKey:Math.random() * Math.random() })
         const _this = this
         console.log(record)
-        if(!record.dispatchConfig){
-        _this.props.form.setFieldsValue({
-            name:record.name,
-            phone:record.phone,
-            sex:record.sex.toString(),
-            trainStationName:record.trainStationName,
-        })
         _this.setState({
             returnData:record
         })            
-        }else{
-            this.setState({ selectedEm: {} })
-        }
-        
     }
 
 
-    //添加/修改确认
-    handleOk(){
-        const dtd = $.Deferred()
-        const _this = this;
-        var employeeList, arr = [], selectedEm
-        this.props.form.validateFields((err, values) => {
-            if(!err){
-                let arr = values.trainStationName.split('&')
-                if(arr.length == 1){
-                    values.trainStationName = _this.state.returnData.trainStationName
-                    values.trainStationId = _this.state.returnData.trainStationId
-                }else{
-                    values.trainStationName = arr[1]
-                    values.trainStationId = arr[0]
-                }
-                if(_this.state.returnData != null){
-                    values.employeeId = _this.state.returnData.employee_id
-                }
-                values.sex = parseInt(values.sex)
-                $.ajax({
-                type: "POST",
-                contentType: 'application/json;charset=utf-8',
-                url: serveUrl + "/hsr-role/saveOrUpdateEmployee?access_token="+ User.appendAccessToken().access_token,
-                data: JSON.stringify({
-                        data:values
-                    }),      
-                success: function (data) {
-                    if(data.status == 200 ){
-                        if(data.data != null){
-                            message.error(data.data);
-                        }else{
-                            message.success(data.msg);
-                        }
-                    }else{
-                        message.error(data.msg);
-                    }
-                    _this.setState({ visibleAdd: false, returnData:null})
-                    _this.getInitList(_this.state.employeeCurrent,_this.state.employeePageSize)
-                    }
-                })
-            }
-    })
-
+    //修改确认
+    handleUpdateOk(){
+        this.setState({ visibleUpdate: false, returnData:null})
+        this.getInitList(this.state.employeeCurrent,this.state.employeePageSize)
     }
 
-    //取消添加/修改
-    handleCancel(){
-        this.setState({visibleAdd:false,returnData:null })
+    //修改取消
+    handleUpdateCancel(){
+        this.setState({returnData:null,visibleUpdate:false, }) 
     }
 
     showTotal(total) {
@@ -253,7 +217,7 @@ class ServiceList extends React.Component {
             render(text,record) {
                 return (
                         <div className="order">
-                            <span onClick={_this.addEmployeeBtn.bind(_this,record)} className='listRefresh'>编辑</span>
+                            <span onClick={_this.updateEmployeeBtn.bind(_this,record)} className='listRefresh'>编辑</span>
                             <Popconfirm title="确认删除?" onConfirm={_this.handleOkDel.bind(_this,record)}>
                                 <span  style={{marginLeft:4}} className='listCancel'>删除</span>
                             </Popconfirm>
@@ -321,67 +285,21 @@ class ServiceList extends React.Component {
                         </div>
                     </Row>
                  </div>
-                 <Modal title="添加/编辑"
+                 <Modal title="添加员工"
                      key={this.state.addKey}
                      visible={this.state.visibleAdd}
                      onOk={this.handleOk.bind(this)}
                      onCancel={this.handleCancel.bind(this)}
                  >
-                     <div>
-                        <Form onSubmit={this.handleSubmit}>
-                            <FormItem
-                                label='员工姓名'
-                                {...formI}
-                            >
-                                {getFieldDecorator('name', {
-                                    rules: [{ required: true, message: '请输入员工姓名!', whitespace: true }],
-                                    
-                                })(
-                                    <Input placeholder="请输入员工姓名" />
-                                )}
-                           </FormItem>
-                           <FormItem
-                                label="性别" 
-                                {...formI}
-                            >
-                                {getFieldDecorator('sex', {
-                                    rules: [{ required: true, message: '请选择!' }],
-                                })(
-                                    <Select placeholder="请选择">
-                                        <Option value="1">男</Option>
-                                        <Option value="0">女</Option>
-                                    </Select>
-                                )}
-                           </FormItem>
-                           <FormItem
-                                {...formI}
-                                label="手机号码"
-                            >
-                                {getFieldDecorator('phone', {
-
-                                    rules: [{ required: true, message: '请输入手机号!', pattern:/^1[3|4|5|7|8][0-9]\d{4,8}$/ }],
-                                })(
-                                    <Input placeholder="请输入手机号" />
-                                )}
-                            </FormItem>
-                            <FormItem
-                                {...formI}
-                                label="所属高铁站"
-                            >
-                                {getFieldDecorator('trainStationName', {
-                                    rules: [{ required: true, message: '请输入高铁站!' }],
-                                })(
-                                    <AutoComplete
-                                        dataSource={this.state.trainStation}
-                                        onChange={this.handleStationChange}
-                                        placeholder="请输入高铁站"
-                                    >
-                                    </AutoComplete>
-                                )}
-                            </FormItem>
-                        </Form>
-                       
-                     </div>
+                     <AddEmployee handleOk={_this.handleOk.bind(_this)} handleCancel={_this.handleCancel.bind(_this)} />
+                 </Modal>
+                 <Modal title="编辑员工"
+                     key={this.state.updateKey}
+                     visible={this.state.visibleUpdate}
+                     onOk={this.handleUpdateOk.bind(this)}
+                     onCancel={this.handleUpdateCancel.bind(this)}
+                 >
+                     <UpdateEmployee handleData={this.state.returnData} handleOk={_this.handleUpdateOk.bind(_this)} handleCancel={_this.handleUpdateCancel.bind(_this)} />
                  </Modal>
             </div>
         )

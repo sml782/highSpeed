@@ -29,8 +29,7 @@ class updateMenu extends React.Component {
     
         $.ajax({
             type: "GET",
-            //url: serveUrl+'/hsr-role/viewMenu?access_token='+ User.appendAccessToken().access_token,
-            url: serveUrl+'/hsr-role/viewMenu?access_token='+ access_token,
+            url: serveUrl + 'hsr-role/viewMenu?access_token=' + User.appendAccessToken().access_token,
             data:{airportCode:'LJG',menuId:_this.props.name},
             success: function(data){
             //    console.log(data)
@@ -74,8 +73,7 @@ class updateMenu extends React.Component {
                 $.ajax({
                     type: "POST",
                     contentType:'application/json;charset=utf-8',
-                    //url: serveUrl+'/hsr-role/addMenu?access_token='+ User.appendAccessToken().access_token,
-                    url: serveUrl+'/hsr-role/addMenu?access_token='+ access_token,
+                    url: serveUrl + 'hsr-role/addMenu?access_token=' + User.appendAccessToken().access_token,
                     data: JSON.stringify(formData),
                     success: function(data){
                         if(data.status == 200){

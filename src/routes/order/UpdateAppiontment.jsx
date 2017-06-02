@@ -59,8 +59,7 @@ class AddAppointment extends React.Component {
         console.log(orderId)
         $.ajax({
             type: "GET",
-            //url: serveUrl+'/hsr-order/getOrderById?access_token=' + User.appendAccessToken().access_token,
-            url: 'http://192.168.0.135:8888' + "/hsr-order/getOrderById?access_token="+User.appendAccessToken().access_token,
+            url: serveUrl + 'hsr-order/getOrderById?access_token=' + User.appendAccessToken().access_token,
             data: {
                 orderId:orderId
             },
@@ -97,8 +96,7 @@ class AddAppointment extends React.Component {
                         _this.trainChange.call(_this,data.data.train.trainTime,data.data.train.trainCode,data.data.train.startPlace)
                         $.ajax({
                             type: "GET",
-                            //url: serveUrl+'/hsr-role/getEmployeeById?access_token=' + User.appendAccessToken().access_token,
-                            url: 'http://192.168.0.135:8888' + "/hsr-role/getEmployeeById?access_token="+User.appendAccessToken().access_token,
+                            url: serveUrl + 'hsr-role/getEmployeeById?access_token=' + User.appendAccessToken().access_token,
                             data: {
                                 employeeId:register
                             },
@@ -114,7 +112,7 @@ class AddAppointment extends React.Component {
                                             register:data.data
                                         })
                                       }else{
-                                        Message.error(data.msg);
+                                        //Message.error(data.msg);
                                     }
                                 }else{
                                     Message.error(data.msg);
@@ -122,7 +120,7 @@ class AddAppointment extends React.Component {
                             },
                         })
                     }else{
-                        Message.error(data.msg);
+                        //Message.error(data.msg);
                     }
                 }else{
                     Message.error(data.msg);
@@ -221,8 +219,7 @@ class AddAppointment extends React.Component {
         console.log(value)
         $.ajax({
             type: "GET",
-            url: 'http://192.168.0.147:8888'+'/hsr-client/getClientDropdownList?access_token=' + User.appendAccessToken().access_token,
-            //url: serveUrl + "/hsr-client/getClientDropdownList?access_token="+access_token,
+            url: serveUrl + "hsr-client/getClientDropdownList?access_token=" + User.appendAccessToken().access_token,
             data: {
                 name:value
             },
@@ -230,7 +227,7 @@ class AddAppointment extends React.Component {
                 console.log(data)
                 if(data.status == 200 ){
                     if(data.data != null){
-                        Message.success(data.msg);
+                        //Message.success(data.msg);
                         const client = data.data.map((v,i)=>{
                             v.key = v.id
                             const key = v.id+'&'+v.value
@@ -241,7 +238,7 @@ class AddAppointment extends React.Component {
                             clientList:data.data
                         })
                     }else{
-                        Message.error(data.msg);
+                        //Message.error(data.msg);
                     }
                 }else{
                     Message.error(data.msg);
@@ -259,8 +256,7 @@ class AddAppointment extends React.Component {
                 console.log(val)
                 $.ajax({
                     type: "GET",
-                    url: serveUrl+'/hsr-order/getTrainInfo?access_token=' + User.appendAccessToken().access_token,
-                    //url: serveUrl + "/hsr-order/getTrainInfo?access_token="+access_token,
+                    url: serveUrl + 'hsr-order/getTrainInfo?access_token=' + User.appendAccessToken().access_token,
                     data: trainTime?{
                         trainTime:moment(trainTime,'YYYY-MM-DD').format('YYYY-MM-DD'),
                         trainCode:trainCode
@@ -272,7 +268,7 @@ class AddAppointment extends React.Component {
                         console.log(data)
                         if(data.status == 200 ){
                             if(data.data != null){
-                                Message.success(data.msg);
+                                //Message.success(data.msg);
                                 const place = data.data.trainPos.map((v,i) => {
                                     return (<Option key={v.stationName}>{v.stationName}</Option>)
                                 })
@@ -286,7 +282,7 @@ class AddAppointment extends React.Component {
                                     _this.startPlaceChange.call(_this,startPlace)
                                 }
                             }else{
-                                Message.error(data.msg);
+                                //Message.error(data.msg);
                             }
                         }else{
                             Message.error(data.msg);
@@ -328,8 +324,7 @@ class AddAppointment extends React.Component {
         const startPlace = this.state.selectStartPlace
         $.ajax({
             type: "GET",
-            url: serveUrl + '/hsr-product/getProductByHsOrId?access_token=' + User.appendAccessToken().access_token,
-            //url: serveUrl + "/hsr-client/getClientDropdownList?access_token="+access_token,
+            url: serveUrl + 'hsr-product/getProductByHsOrId?access_token=' + User.appendAccessToken().access_token,
             data: {
                 data:startPlace
             },
@@ -337,7 +332,7 @@ class AddAppointment extends React.Component {
                 console.log(data)
                 if(data.status == 200 ){
                     if(data.data != null){
-                        Message.success(data.msg);
+                        //Message.success(data.msg);
                         const productList = data.data.rows.map((v,i) => {
                             return (<Option key={v.productId+'&'+v.name}>{v.name}</Option>)
                         })
@@ -347,7 +342,7 @@ class AddAppointment extends React.Component {
                             productList:data.data.rows
                         })
                     }else{
-                        Message.error(data.msg);
+                        //Message.error(data.msg);
                         
                     }
                 }else{
@@ -363,8 +358,7 @@ class AddAppointment extends React.Component {
         console.log(value)
         $.ajax({
             type: "GET",
-            url: 'http://192.168.0.147:8888'+'/hsr-role/getEmployeeDropdownList?access_token=' + User.appendAccessToken().access_token,
-            //url: serveUrl + "/hsr-role/getEmployeeDropdownList?access_token="+access_token,
+            url: serveUrl + "hsr-role/getEmployeeDropdownList?access_token=" + User.appendAccessToken().access_token,
             data: {
                 name:value
             },
@@ -372,7 +366,7 @@ class AddAppointment extends React.Component {
                 console.log(data)
                 if(data.status == 200 ){
                     if(data.data != null){
-                        Message.success(data.msg);
+                        //Message.success(data.msg);
                         const register = data.data.map((v,i)=>{
                             return <AutoCompleteOption key={v.id}>{v.value}</AutoCompleteOption>;
                         })
@@ -381,11 +375,11 @@ class AddAppointment extends React.Component {
                             registerList:data.data
                         })
                     }else{
-                        Message.error(data.msg);
+                        //Message.error(data.msg);
                         
                     }
                 }else{
-                    Message.error(data.msg);
+                    //Message.error(data.msg);
                 }
                 
             }
@@ -448,8 +442,7 @@ class AddAppointment extends React.Component {
                 $.ajax({
                     type: "POST",
                     contentType:'application/x-www-form-urlencoded',
-                    //url: serveUrl + "/hsr-order/updateOrder?access_token="+User.appendAccessToken().access_token,
-                    url: 'http://192.168.0.135:8888' + "/hsr-order/updateOrder?access_token="+User.appendAccessToken().access_token,
+                    url: serveUrl + "hsr-order/updateOrder?access_token=" + User.appendAccessToken().access_token,
                     data: JSON.stringify({data:values}),      
                     success: function (data) {
                         console.log(data)
@@ -527,8 +520,7 @@ class AddAppointment extends React.Component {
                 $.ajax({
                     type: "POST",
                     contentType:'application/x-www-form-urlencoded',
-                    //url: serveUrl + "/hsr-order/updateOrder?access_token="+User.appendAccessToken().access_token,
-                    url: 'http://192.168.0.135:8888' + "/hsr-order/updateOrder?access_token="+User.appendAccessToken().access_token,
+                    url: serveUrl + "hsr-order/updateOrder?access_token=" + User.appendAccessToken().access_token,
                     data: JSON.stringify({data:values}),      
                     success: function (data) {
                         console.log(data)
@@ -648,7 +640,9 @@ class AddAppointment extends React.Component {
                                     label="高铁日期"
                                 >
                                     {getFieldDecorator('trainTime', {
-                                       
+                                       rules: [{
+                                            required: true,message: '请输入高铁日期!',
+                                        }],
                                     })(
                                         <DatePicker placeholder="请选择高铁日期" format="YYYY-MM-DD" />
                                     )}
@@ -672,7 +666,9 @@ class AddAppointment extends React.Component {
                                     label="高铁车次"
                                 >
                                     {getFieldDecorator('trainCode', {
-                                        
+                                        rules: [{
+                                            required: true,message: '请输入高铁车次!',
+                                        }],
                                     })(
                                         <Input onBlur={_this.trainChange.bind(_this)} placeholder='请输入高铁车次' />
                                     )}

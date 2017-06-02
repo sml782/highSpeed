@@ -101,14 +101,13 @@ class ServiceList extends React.Component {
         const _this = this
         $.ajax({
             type: "GET",
-            url: serveUrl+'/hsr-role/getMenuByRoleId?access_token='+ User.appendAccessToken().access_token,
-            //url: serveUrl + '/hsr-role/getMenuByRoleId?access_token=' + access_token,
+            url: serveUrl + 'hsr-role/menuTree?access_token='+ User.appendAccessToken().access_token,
             contentType: 'application/json;charset=utf-8',
             data:{
                 roleId:1
             },
             success: function(data){
-                console.log('获取成功')
+                console.log(data)
                 _this.setState({
                       menuListDate:data.data
                 })
@@ -160,8 +159,7 @@ class ServiceList extends React.Component {
             $.ajax({
                 type: "POST",
                 contentType: 'application/json;charset=utf-8',
-                url: serveUrl + "/hsr-role/deleteMenus?access_token="+User.appendAccessToken().access_token,
-                //url: serveUrl + "/hsr-role/deleteMenus?access_token="+'8S9jRHT9vSheueiQQPzEgOqHnI9H4CVK9nYXpad9',
+                url: serveUrl + "hsr-role/deleteMenus?access_token=" + User.appendAccessToken().access_token,
                 data: JSON.stringify({
                     data: [parseInt(_this.state.menuId)]
                 }),
@@ -214,22 +212,15 @@ class ServiceList extends React.Component {
             width: '30%',
             dataIndex: 'name',
             menuId:'name',
-            // render(text,record) {
-            //     return (
-            //             <div>
-            //                  <div className="order menuclassfiy">{text}</div>
-            //             </div>
-            //             )
-            // }
         },{
             title: '位置',
             width: '30%',
             dataIndex: 'position',
-            // render(text,record) {
-            //     return (
-            //             <div className="order">{text}</div>
-            //             )
-            // }
+            render(text,record) {
+                return (
+                        <div className="order">{text}</div>
+                        )
+            }
         },{
             title: '操作',
             width: '40%',

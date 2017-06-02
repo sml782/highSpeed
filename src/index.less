@@ -1,3 +1,6 @@
+
+
+
 .f16 {
     font-size: 16px;
 }
@@ -243,10 +246,6 @@
     z-index:999;
 }
 
-//表单样式
-.ant-form {
-    padding: 0 50px;
-}
 
 //表格样式
 .order-list .ant-table{
@@ -589,11 +588,17 @@ input::-ms-input-placeholder{padding-left: 12px;}
     }
 }
 .ant-form{
-    padding: 0 70px !important;
+    padding: 0 70px;
 }
+
 .ant-modal-body{
-    padding: 24px 16px !important;
+    padding: 24px 0px 0px !important;
 }
+
+.ant-modal-footer{
+    margin-top: 20px;
+}
+
 .ant-form-item:last-child{
     margin-bottom: 0 !important;
 }
@@ -606,4 +611,11 @@ input::-ms-input-placeholder{padding-left: 12px;}
 .ant-input-lg{
     height: 40px !important;
 
+}
+
+input:-webkit-autofill {
+    background-color: transparent !important;
+    background-image: none;
+    color: #000;
+    //box-shadow:0 0 0 1000px transparent inset;
 }

@@ -77,8 +77,7 @@ class AddMenu extends React.Component {
         const _this = this
         $.ajax({
             type: "GET",
-            url: serveUrl+'/hsr-role/getMenuByRoleId?access_token='+ User.appendAccessToken().access_token,
-            //url: serveUrl+'/hsr-role/getMenuByRoleId?access_token='+ access_token,
+            url: serveUrl + 'hsr-role/getMenuByRoleId?access_token=' + User.appendAccessToken().access_token,
             data:{airportCode:'LJG',roleId:1},
             success: function(data){
                 _this.setState({
@@ -110,8 +109,7 @@ class AddMenu extends React.Component {
                 $.ajax({
                     type: "POST",
                     contentType:'application/json;charset=utf-8',
-                    url: serveUrl+'/hsr-role/addMenu?access_token='+User.appendAccessToken().access_token,
-                   // url: serveUrl+'/hsr-role/addMenu?access_token='+access_token,
+                    url: serveUrl + 'hsr-role/addMenu?access_token=' + User.appendAccessToken().access_token,
                     data: JSON.stringify(formData),
                     success: function(data){
                         if(data.status == 200){
@@ -181,7 +179,7 @@ class AddMenu extends React.Component {
                             
                     <Form horizontal style={{marginLeft:200}}>
                         <Row>
-                            <Col span={12}>
+                            <Col span={12} >
                                 <FormItem label="菜单名称" {...formItemLayout} hasFeedback   >
                                     {getFieldDecorator('name', {
                                         rules: [{ required: true,message: '请输入菜单名称!' }],
