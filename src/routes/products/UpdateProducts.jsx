@@ -25,12 +25,15 @@ class UpdateProducts extends React.Component {
     }
 
      componentWillMount() {
-        
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
     }
     componentDidMount(){
         $('.add').parent().parent().find('.ant-modal-footer').eq(1).remove()
         const values = this.props.selectedProduct
-        console.log(values)
+        
         if(Object.keys(values).length){
             this.setState({
                 updatePro:values
@@ -52,7 +55,7 @@ class UpdateProducts extends React.Component {
     }
 
     handleSubmit =(e)=>{
-       console.log(e)
+       
        e.preventDefault()
     }
    
@@ -61,7 +64,7 @@ class UpdateProducts extends React.Component {
         const _this = this
         if(value !== ''){
             getTrainStation(value,(station) => {
-                console.log(station)
+                
                 if(station){
                     const trainStation = station.map((s) => {
                         return <AutoCompleteOption key={s.no+'&'+s.value}>{s.value}</AutoCompleteOption>;
@@ -94,13 +97,13 @@ class UpdateProducts extends React.Component {
                         
                     }
                     values.productId = selectedProduct.productId
-                    console.log(values)
+                    
                     $.ajax({
                         type: "POST",
                         url: serveUrl + "hsr-product/updateProduct?access_token=" + User.appendAccessToken().access_token,
                         data: JSON.stringify({data:values}),      
                         success: function (data) {
-                            console.log(data)
+                            
                             if(data.status == 200 ){
                                 if(data.data != null){
                                     Message.error(data.msg);
@@ -114,9 +117,8 @@ class UpdateProducts extends React.Component {
                             }else{
                                 Message.error(data.msg);
                             }
-                            _this.props.getInitList(1,10)
-                            }
-                        })
+                        }
+                    })
                     
                 }
             

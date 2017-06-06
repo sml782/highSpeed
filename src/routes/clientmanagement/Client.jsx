@@ -2,7 +2,7 @@ import './client.less'
 
 import React from 'react';
 import { hashHistory } from 'react-router';
-import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete} from 'antd';
+import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete,Spin} from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData} from '../../utils/config';
@@ -35,7 +35,8 @@ class Client extends React.Component {
             employeeId:null,
             clientTypeResult:[],
             clientId:null,//删除客户的id 
-            visibleEdit:false
+            visibleEdit:false,
+            loading:'block',
         }
     }
 
@@ -69,10 +70,10 @@ class Client extends React.Component {
     }
 
      componentWillMount() {
-        //  if(User.isLogin()){
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
         this.getInitList(this.state.clientListDateCurrent,this.state.clientListDatePageSize); 
     }
     componentDidMount=()=>{
@@ -93,6 +94,7 @@ class Client extends React.Component {
      getInitList(page,rows){
         const data = [];
         const _this = this;
+        _this.setState({loading:'block'})
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
                 $.ajax({
@@ -103,7 +105,7 @@ class Client extends React.Component {
                         rows:rows,
                         },
                     success: function(data){
-                        console.log(data)
+                        
                         if(data.status == 200 ){
                             if(data.data != null){
                                 data.data.rows.map((v,index)=>{
@@ -117,7 +119,7 @@ class Client extends React.Component {
                         }else{
                             Message.error('客户列表获取失败')
                         }
-                        
+                        _this.setState({loading:'none'})
                     }
                 });
             }
@@ -186,8 +188,8 @@ class Client extends React.Component {
                 {
                     name: _this.props.form.getFieldValue('name1'),
                     type: _this.props.form.getFieldValue('type1'),
-                    ifCheckStr:_this.props.form.getFieldValue('ifCheckStr1'),
-                    ifChargeStr:_this.props.form.getFieldValue('ifChargeStr1')
+                    isCheckStr:_this.props.form.getFieldValue('isCheckStr1'),
+                    isChargeStr:_this.props.form.getFieldValue('isChargeStr1')
                 }
             ]
         }
@@ -214,7 +216,7 @@ class Client extends React.Component {
 
     //修改
     handleEditOk(){  
-        console.log(this.props.form.getFieldValue('name'))   
+        
     }
 
     //修改
@@ -267,7 +269,7 @@ class Client extends React.Component {
         }, {
             title: '是否需要验证卡号',
             width: '30%',
-            dataIndex: 'ifCheckStr',
+            dataIndex: 'isCheckStr',
             render(text,record) {
                 return (
                         <div className="order">{text}</div>
@@ -276,7 +278,7 @@ class Client extends React.Component {
         }, {
             title: '是否收费',
             width: '15%',
-            dataIndex: 'ifChargeStr',
+            dataIndex: 'isChargeStr',
             render(text,record) {
                 return (
                         <div className="order">{text}</div>
@@ -358,6 +360,7 @@ class Client extends React.Component {
                     <Row>
                         <div className='btn-add' style={{marginLeft:'87%'}} onClick={this.addClientBtn.bind(this)}><span>新增客户</span><img src={require('../../assets/images/add.png')} className='addImg'/></div>
                         <div className="search-result-list" >
+                            <Spin size='large' tip='加载中' style={{display:this.state.loading}} />
                             <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={this.state.clientListDate}  className="serveTable"/>     
                         </div>
                     </Row>

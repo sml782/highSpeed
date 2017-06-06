@@ -2,7 +2,7 @@ import './order.less'
 
 import React from 'react'
 import { hashHistory } from 'react-router'
-import { Breadcrumb, Form, Row, Col, Input, Button, Icon, Select, Popconfirm, Message, Table, Modal, DatePicker } from 'antd'
+import { Breadcrumb, Form, Row, Col, Input, Button, Icon, Select, Popconfirm, Message, Table, Modal, DatePicker,Spin, AutoComplete  } from 'antd'
 import { Link } from 'react-router'
 import $ from 'jquery'
 import moment from 'moment'
@@ -11,11 +11,15 @@ import DeleteDialog from '../DeleteDialog';//引入删除弹框
 import getTrainStation from '../../utils/station';//引入所属高铁站
 const msg = '确定删除吗?'
 
+const FormItem = Form.Item;
+const AutoCompleteOption = AutoComplete.Option;
 
 class OrderList extends React.Component {
     constructor (props) {
         super(props);
         this.state = {
+            clientName:[],
+            queryValues:{},
             orderListDate: [],
             orderListDateLength:0,
             orderListPage: 1,
@@ -28,63 +32,110 @@ class OrderList extends React.Component {
             selectedOrder:{},
             filteredInfo: null,
             sortedInfo: null,
+            loading:'block',
         }
         this.getInitList = this.getInitList.bind(this)
     }
 
     componentWillMount () {
- 
+        
+        
     }
 
     componentDidMount () {
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
         //TODO AJAX
+        this.clientChange()
         this.getInitList(this.state.orderListPage, this.state.orderListRows)
-        // this.props.form.validateFields((err, value) => {
-        //   if(!err){
-        //       console.log(value.queryTrainTime)
-        //   }
-        // })
     }
 
     componentWillUpdate () {
 
     }
 
-    componentWillReceiveProps (values) {
-        var v = Object.keys(values.initVal)
-        if(v.length){
-            this.getInitList(this.state.orderListPage, this.state.orderListRows, values.initVal)
-        }
+    handleSearch = (e) => {
+        e.preventDefault();
+        const trainTime =  $('.trainTime').find('.ant-form-item-control-wrapper').find('.ant-calendar-picker-input').val()
+        this.props.form.validateFields((err, values) => {
+            if(!err){
+                values.queryTrainTime = trainTime == '' ? '' : moment(trainTime).format("YYYY-MM-DD");
+                this.setState({queryValues:values,orderListPage:1},()=>{this.getInitList(this.state.orderListPage, this.state.orderListRows, values)});
+            }
+            
+        })
+    }
+
+    handleReset = () => {
+        this.props.form.resetFields();
+    }
+
+    //请求客户名称
+    clientChange = (value) => {
+        const _this = this
+        $.ajax({
+            type: "GET",
+            url: serveUrl + 'hsr-client/getClientDropdownList?access_token=' + User.appendAccessToken().access_token,
+            data: {
+                name:value
+            },
+            success: function (data) {
+                if(data.status == 200 ){
+                    if(data.data != null){
+                        const client = data.data.map((v,i)=>{
+                            v.key = v.id
+                            return (<AutoCompleteOption className='w' key={v.value}>{v.value}</AutoCompleteOption>)
+                        })
+                        _this.setState({
+                            clientName: client,
+                        })
+                    }else{
+                        //Message.error(data.msg);
+                    }
+                }else{
+                    //Message.error(data.msg);
+                }
+                
+            }
+        });
+    }
+
+    //客户点击时调节选项宽度
+    clientWidth = () => {
+        $('.w').css({width:180})
     }
 
     //获取
     getInitList(page, rows, values) {
         const _this = this;
+        _this.setState({loading:'block'})
         const data =  $.extend({
                 page: page,
                 rows: rows,
             },values)
-        console.log(data)
+        
         $.ajax({
             type: "GET",
             url: serveUrl + 'hsr-order/getOrderByKey?access_token=' + User.appendAccessToken().access_token,
             data: data,
             success: function (data) {
-                console.log(data)
+                
                 if(data.status == 200 ){
                     if(data.data != null){
                         //Message.success(data.msg);
                         const len = data.data.rows.length
                         const d = data.data.rows
                         for(var i = 0;i < len;i++){
-                            d[i].key = d[i].orderId
+                            d[i].key = i;
                             //高铁
                             d[i].trainCode = d[i].train.trainCode?d[i].train.trainCode:'--'
-                            //d[i].trainTime = d[i].train.trainTime?d[i].train.trainTime:'--'
+                            d[i].trainTime = d[i].train.trainTime?d[i].train.trainTime:'--'
                             d[i].startPlace = d[i].train.startPlace?d[i].train.startPlace:'--'
                             d[i].destinationPlace = d[i].train.destinationPlace?d[i].train.destinationPlace:'--'
-                            //d[i].startTime = d[i].train.startTime?d[i].train.startTime:'--'
-                            //d[i].checkTime = d[i].train.checkTime?d[i].train.checkTime:'--'
+                            d[i].startTime = d[i].train.startTime?d[i].train.startTime:'--'
+                            d[i].checkTime = d[i].train.checkTime?d[i].train.checkTime:'--'
                             d[i].ticketBarrier = d[i].train.ticketBarrier?d[i].train.ticketBarrier:'--'
 
                             //收费
@@ -93,38 +144,31 @@ class OrderList extends React.Component {
                             // d[i].price = d[i].price?d[i].price:'--'
                             //登记人
                             d[i].register = d[i].register?d[i].register:'--'
+                            var travellerName = ''
                             for(var k = 0;k < d[i].travellerList.length;k++){
-                                d[i].travellerList[k].key = d[i].travellerList[k].travellerId ? d[i].travellerList[k].travellerId : Math.random()
+                                d[i].travellerList[k].key = d[i].travellerList[k].travellerId;
                                 d[i].travellerList[k].orderId = ''
                                 d[i].travellerList[k].trainCode = ''
                                 d[i].travellerList[k].startPlace = ''
                                 d[i].travellerList[k].destinationPlace = ''
                                 d[i].travellerList[k].trainTime = ''
-                                d[i].travellerList[k].startTime = ''
-                                d[i].travellerList[k].checkTime = ''
-                                if(!d[i].travellerList[k].isDeleted && d[i].travellerList[k].thirdPartCode !== ''){
-                                    var travellerName = d[i].travellerList[k].travellerName
-                                    var phoneNumber = d[i].travellerList[0].phoneNumber
-                                    var seatNum = d[i].travellerList[0].seatNum
-                                    var thirdPartCode = d[i].travellerList[0].thirdPartCode
-                                }else if(d[i].travellerList[k].travellerName !== ''){
-                                    var travellerName = d[i].travellerList[k].travellerName == '' ? '--' : d[i].travellerList[k].travellerName
-                                    var phoneNumber = d[i].travellerList[0].phoneNumber == '' ? '--' : d[i].travellerList[0].phoneNumber
-                                    var seatNum = d[i].travellerList[0].seatNum == '' ? '--' : d[i].travellerList[0].seatNum
-                                    var thirdPartCode = '--'
-                                }
+                                d[i].travellerList[k].startTime = '--'
+                                d[i].travellerList[k].checkTime = '--'
+                                travellerName += d[i].travellerList[k].travellerName ? d[i].travellerList[k].travellerName + '、' : ''
+                                var phoneNumber = d[i].travellerList[0].phoneNumber
+                                var seatNum = d[i].travellerList[0].seatNum
+                                var thirdPartCode = d[i].travellerList[0].thirdPartCode
                             }
-                            d[i].travellerName = travellerName
+                            d[i].travellerName = travellerName.substring(0,travellerName.length-1) == '' ? '--' : travellerName.substring(0,travellerName.length-1)
                             d[i].phoneNumber = phoneNumber
                             d[i].seatNum = seatNum
                             d[i].thirdPartCode = thirdPartCode
-                            d[i].children = d[i].travellerList.length > 1 ? d[i].travellerList : undefined
                         }
-                        console.log(data.data.rows)
                         _this.setState({
                             orderListDate: d,
                             orderListDateLength: data.data.total,
                         })
+                        
                     }else{
                         //Message.error(data.msg);
                         
@@ -132,6 +176,7 @@ class OrderList extends React.Component {
                 }else{
                     Message.error(data.msg);
                 }
+                _this.setState({loading:'none'})
             }
         });
     }
@@ -142,10 +187,10 @@ class OrderList extends React.Component {
         const _this = this
         $.ajax({
             type: "POST",
-            url: serveUrl + "hsr-order/deleteOrder?access_token=" + User.appendAccessToken().access_token,
+            url: serveUrl + "hsr-order/cancelOrder?access_token=" + User.appendAccessToken().access_token,
             data: {orderId:record.orderId},      
             success: function (data) {
-                console.log(data)
+                
                 if(data.status == 200 ){
                     if(data.data != null){
                         Message.error(data.msg);
@@ -162,7 +207,7 @@ class OrderList extends React.Component {
 
     //编辑跳转
     changeOrder = (record) => {
-        console.log(record)
+        
         this.setState({selectedOrder:record})
         hashHistory.push(`/updateAppointment/${record.orderId}`)
     }
@@ -172,18 +217,23 @@ class OrderList extends React.Component {
     
     render () {
         const _this = this
+        const { getFieldDecorator } = this.props.form;
+        const { formLayout } = this.state;
+        const formCol = { span: 8};
+        const buttonItemLayout = null;
         const pagination = {
            size:'small',
-           showTotal:_this.showTotal ,
+           showTotal:_this.showTotal,
+           current: _this.state.orderListPage,
             total: _this.state.orderListDateLength,
             onShowSizeChange(current, pageSize) {
                 _this.state.orderListPage = current;
                 _this.state.orderListRows = pageSize;
-                _this.getInitList(_this.state.orderListPage,_this.state.orderListRows);
+                _this.getInitList(_this.state.orderListPage,_this.state.orderListRows,_this.state.queryValues);
             },
             onChange(current) {
                 _this.state.orderListPage = current;
-                _this.getInitList(_this.state.orderListPage,_this.state.orderListRows);
+                _this.getInitList(_this.state.orderListPage,_this.state.orderListRows,_this.state.queryValues);
             },
 
       };
@@ -195,7 +245,7 @@ class OrderList extends React.Component {
       }, {
         title: '高铁车次',
         dataIndex: 'trainCode',
-        width:100,
+        width:120,
         render: (text,record) => (
             <div>
                 <span >{text}</span>
@@ -203,16 +253,16 @@ class OrderList extends React.Component {
       }, {
         title: '高铁日期',
         dataIndex: 'trainTime',
-        width:110,
-        sorter: (a, b) => a.time - b.time,
+        width:120,
+        sorter: (a, b) => a.trainTime - b.trainTime,
         render: (text,record) => (
             <div>
-                <span >{text == '' ? '':moment(text).format('YYYY-MM-DD')}</span>
+                <span >{text == '--'?'--':moment(text).format('YYYY-MM-DD')}</span>
             </div>),
       }, {
         title: '出发地',
         dataIndex: 'startPlace',
-        width:70,
+        width:80,
         render: (text,record) => (
             <div>
                 <span >{text}</span>
@@ -220,7 +270,7 @@ class OrderList extends React.Component {
       }, {
         title: '目的地',
         dataIndex: 'destinationPlace',
-        width:70,
+        width:80,
         render: (text,record) => (
             <div>
                 <span >{text}</span>
@@ -228,11 +278,11 @@ class OrderList extends React.Component {
       }, {
         title: '开车时间',
         dataIndex: 'startTime',
-        width:110,
+        width:120,
         sorter: (a, b) => a.time - b.time,
         render: (text,record) => (
             <div>
-                <span >{text == '' ? '' : moment(text).format('HH:mm')}</span>
+                <span >{text == '--'?'--':moment(text).format('HH:mm')}</span>
             </div>),
       }, {
         title: '检票时间',
@@ -241,12 +291,12 @@ class OrderList extends React.Component {
         sorter: (a, b) => a.time - b.time,
         render: (text,record) => (
             <div>
-                <span >{text == '' ? '' : moment(text).format('HH:mm')}</span>
+                <span >{text == '--'?'--':moment(text).format('HH:mm')}</span>
             </div>),
       }, {
         title: '检票口',
         dataIndex: 'ticketBarrier',
-        width:70,
+        width:80,
         render: (text,record) => (
             <div>
                 <span >{text}</span>
@@ -254,7 +304,7 @@ class OrderList extends React.Component {
       }, {
         title: '旅客姓名',
         dataIndex: 'travellerName',
-        width:110,
+        width:120,
         render: (text,record) => (
             <div>
                 <span >{text}</span>
@@ -270,7 +320,7 @@ class OrderList extends React.Component {
       }, {
         title: '座位号',
         dataIndex: 'seatNum',
-        width:70,
+        width:80,
         render: (text,record) => (
             <div>
                 <span >{text}</span>
@@ -337,10 +387,23 @@ class OrderList extends React.Component {
         title: '收费类型',
         width:90,
         dataIndex: 'type',
-        render: (text,record) => (
-            <div>
-                <span >{text?text:'无'}</span>
-            </div>),
+        render: (text,record) => {
+            var type = '';
+            switch (text){
+                case 2: type = '现金';
+                    break;
+                case 3: type = '刷卡';
+                    break;
+                case 4: type = '网络';
+                    break;
+                default: type = '无';
+            }
+            return (
+                <div>
+                    <span >{type}</span>
+                </div>
+            )
+        },
       }, {
         title: '收费价格',
         dataIndex: 'price',
@@ -351,7 +414,7 @@ class OrderList extends React.Component {
             </div>),
       }, {
         title: '登记人',
-        dataIndex: 'register',
+        dataIndex: 'registerName',
         width:70,
         render: (text,record) => (
             <div>
@@ -379,16 +442,22 @@ class OrderList extends React.Component {
         dataIndex: 'handle',
         fixed: 'right',
         width:120,
-        render: (text,record) => (<div>
-            <span className='listRefresh' onClick={_this.changeOrder.bind(_this,record)}>编辑</span>
-            <Popconfirm title="确认删除?" onConfirm={_this.handleOkDel.bind(_this,record)}>
-                <span  style={{marginLeft:4}} className='listCancel'>取消</span>
-            </Popconfirm>
-        </div>),
+        render: (text,record) => {
+            if(record.status){
+                return (
+                    <div>
+                        <span className='listRefresh' onClick={_this.changeOrder.bind(_this,record)}>编辑</span>
+                        <Popconfirm title="确认取消?" onConfirm={_this.handleOkDel.bind(_this,record)}>
+                            <span  style={{marginLeft:4}} className='listCancel'>取消</span>
+                        </Popconfirm>
+                    </div>
+                )
+            }
+        },
       }];
       const rowSelection = {
         onChange: (selectedRowKeys, selectedRows) => {
-          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+          
         },
         getCheckboxProps: record => ({
           disabled: record.name === 'Disabled User',    // Column configuration not to be checked
@@ -396,10 +465,76 @@ class OrderList extends React.Component {
       };
         return (
             <div className="search-result-list" >
+                <div className="breadcrumb-box">
+                    <div className="top-bar"></div>
+                    <div className="breadcrumb">
+                        <Breadcrumb>
+                            <Breadcrumb.Item>订单管理</Breadcrumb.Item>
+                        </Breadcrumb>
+                    </div>
+                </div>
+                <Form layout={'inline'} className="order-search-g">
+                    <Row className="order-search">
+                        <Col {...formCol}>
+                            <FormItem
+                                label="高铁车次" 
+                            >
+                                {getFieldDecorator('queryTrainCode', {})(       
+                                    <Input placeholder="请输入客户车次" />
+                                )}
+                            </FormItem>
+                        </Col>
+                        <Col  {...formCol}>
+                            <FormItem
+                                label="旅客姓名" 
+                            >   
+                                {getFieldDecorator('queryTravellerName', {})(
+                                    <Input placeholder="旅客姓名" />
+                                )}
+                            </FormItem>
+                        </Col>
+                         <Col  span={7} style={{marginLeft:35}}>
+                            <div className='btn-add'><Link to='/addAppointment'><span>添加订单</span><img src={require('../../assets/images/add.png')} className='addImg'/></Link></div>
+                        </Col>
+                    </Row>
+                    <Row className="order-search">
+                        <Col  {...formCol}>
+                            <FormItem
+                                label="客户名称"
+                            >
+                                {getFieldDecorator('queryClientName', {})(
+                                    <AutoComplete
+                                        dataSource={_this.state.clientName}
+                                        onSearch={_this.clientChange.bind(_this)}
+                                        onFocus={_this.clientWidth.bind(_this)}
+                                        placeholder="请输入客户名称"
+                                    >
+                                    </AutoComplete>
+                                )}
+                            </FormItem>
+                        </Col>
+                        <Col  {...formCol}>
+                            <FormItem
+                                label="高铁日期"
+                                className='trainTime'
+                            >
+                                {getFieldDecorator('queryTrainTime', {})(
+                                    <DatePicker />
+                                )}
+                           </FormItem>
+                        </Col>                        
+                        <Col  span={7} style={{marginLeft:35}}>
+                            <div className='btn-search' onClick={_this.handleSearch.bind(_this)}><img src={require('../../assets/images/search.png')} className='seacrhImg'/><span>查&nbsp;询</span></div>
+                       </Col>   
+                    </Row>
+                </Form>
+                <Spin size='large' tip='加载中' style={{display:this.state.loading}} />
                 <Table className="order-list" columns={columns} pagination={pagination} dataSource={_this.state.orderListDate} scroll={{x: '190%', y: 0}} />
             </div>
         )
     }
 }
+
+OrderList = Form.create()(OrderList)
 
 export default OrderList

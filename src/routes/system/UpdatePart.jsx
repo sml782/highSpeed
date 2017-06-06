@@ -40,7 +40,11 @@ class UpdatePart extends React.Component {
         //     hashHistory.push('/login');
         // }
         // this.getInit()
-        console.log(this.props.params.roleId)
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
+        
     }
     componentDidMount=()=>{
         $(".ant-breadcrumb-separator").html(">");

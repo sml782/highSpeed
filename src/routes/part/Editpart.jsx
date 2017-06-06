@@ -61,10 +61,10 @@ class Editpart extends React.Component {
     }
    
     componentWillMount() {
-        //  if(User.isLogin()){
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+       if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
         
     }
     componentDidMount=()=>{
@@ -91,7 +91,7 @@ class Editpart extends React.Component {
                             _this.state.loungeIdList.push(k.productId);
                         })
                     }
-                    console.log(_this.state.value);
+                    
                     _this.setState({
                         value:_this.state.value,
                         productList:data.data.productList
@@ -221,6 +221,7 @@ class Editpart extends React.Component {
                     data:[{
                         name: values.name,//菜单管理
                         account: values.account,
+                        isExist:1,
                         productIdList:_this.state.loungeIdList,
                         menuIdList:_this.state.value,
                         roleId: _this.props.params.roleId
@@ -312,7 +313,7 @@ class Editpart extends React.Component {
                     
 
 
-                    <Form horizontal style={{marginTop:44}}>
+                    <Form layout='horizontal' style={{marginTop:44}}>
                         <Row>
                             <FormItem label="角色名称" {...formItemLayout} hasFeedback required >
                                 {getFieldDecorator('name', {

@@ -55,8 +55,8 @@ class Login extends React.Component {
             if ($('#user').val() && $('#pwd').val()) {
                 $.ajax({
                     type: 'POST',
-                    //url: 'http://airport.zhiweicloud.com/oauth/oauth/access_token',
-                    url:'http://101.37.106.176/oauth/oauth/access_token',
+                    url: 'http://airport.zhiweicloud.com/oauth/oauth/access_token',
+                    //url:'http://101.37.106.176/oauth/oauth/access_token',
                     data: {
                         grant_type: 'password',
                         client_id: 'LJG',

@@ -11,6 +11,7 @@ import DeleteDialog from '../DeleteDialog';//引入删除弹框
 import getTrainStation from '../../utils/station';//引入所属高铁站
 import $ from 'jquery';
 
+
 const FormItem = Form.Item;
 const Option = Select.Option;
 const Search = Input.Search;
@@ -38,6 +39,10 @@ class AddPart extends React.Component {
     }
 
      componentWillMount() {
+          if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
         //  if(User.isLogin()){
         // } else{
         //     hashHistory.push('/login');
@@ -58,7 +63,7 @@ class AddPart extends React.Component {
         $(".ant-breadcrumb-separator").css({color:'#333'});
         $('.loungeBtn').find('.ant-btn').eq(1).hide()
         const _this = this
-        console.log(this.props.params.roleId)
+        
         if(this.props.params.roleId){
             $.ajax({
                 type: "GET",
@@ -111,7 +116,7 @@ class AddPart extends React.Component {
     
     //删除框
     showModalDel = (recode) => {
-        console.log(recode.lounge)
+        
         this.setState({ visibleDel:true, selectLKey:recode.key })
     }
     handleOkDel = () => {
@@ -148,7 +153,7 @@ class AddPart extends React.Component {
         }else{
             //编辑
             this.setState({ loungeKey:recode.key })
-            console.log(addpl)
+            
  
         }
     }
@@ -170,7 +175,7 @@ class AddPart extends React.Component {
             if(!err){
                 function add (dtd) {
                     values.productIds = lounges
-                    console.log(values)
+                    
                     dtd.reject()
                     return dtd
                 }

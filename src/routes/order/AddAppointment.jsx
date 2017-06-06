@@ -43,25 +43,21 @@ class AddAppointment extends React.Component {
     }
 
     componentWillMount () {
-
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
     }
 
     componentDidMount () {
         //TODO AJAX
         $('.type').hide()
-    }
-
-    componentWillUpdate () {
-
-    }
-
-    onchange () {
-
+        this.registerChange();
     }
     
     //控制收费类型显示与隐藏
     typeShow = (value) => {
-        console.log(value)
+        
         if(value * 1){
             $('.type').show()
         }else{
@@ -71,7 +67,7 @@ class AddAppointment extends React.Component {
 
     //删除旅客Modal
     delPassModal = (record) => {
-        console.log(record)
+        
         this.setState({visibleDel:true,selectPassenger:record})
     }
     //删除确认
@@ -84,7 +80,7 @@ class AddAppointment extends React.Component {
             }
         })
         this.setState({visibleDel:false,passengerList:passengerList,selectPassenger:{}})
-        console.log(this.state.passengerList)
+        
     }
     //删除取消
     delPassCancle = () => {
@@ -93,7 +89,7 @@ class AddAppointment extends React.Component {
 
     //增加旅客Modal
     addPassModal = (record) => {
-        console.log(record)
+        
         this.setState({addKey:Math.random()*Math.random(),visibleAdd:true,selectPassenger:record})
     }
 
@@ -113,7 +109,7 @@ class AddAppointment extends React.Component {
                     v.seatNum = values.seatNum
                     v.thirdPartCode = values.thirdPartCode
                     v.travellerName = values.travellerName
-                    console.log(v)
+                    
                 }
             })
         }
@@ -131,7 +127,7 @@ class AddAppointment extends React.Component {
     //请求客户名称
     clientChange = (value) => {
         const _this = this
-        console.log(value)
+        
         $.ajax({
             type: "GET",
             url: serveUrl + 'hsr-client/getClientDropdownList?access_token=' + User.appendAccessToken().access_token,
@@ -139,7 +135,7 @@ class AddAppointment extends React.Component {
                 name:value
             },
             success: function (data) {
-                console.log(data)
+                
                 if(data.status == 200 ){
                     if(data.data != null){
                         //Message.success(data.msg);
@@ -163,56 +159,72 @@ class AddAppointment extends React.Component {
         });
     }
 
+    //客户选中时设置是否收费
+    selectClient = (client) => {
+        const _this = this;
+        const c = client.split('&');
+        const clientList = this.state.clientList;
+        for(var i = 0;i < clientList.length;i++){
+            if(c[0] == clientList[i].id){
+                _this.props.form.setFieldsValue({
+                    isCharge:clientList[i].isCharge?'1':'0'
+                })
+                _this.typeShow.call(_this,clientList[i].isCharge)
+                return
+            }
+        }
+        
+    }
+
     //请求高铁车次
     trainChange = () => {
         const _this = this
-        this.props.form.validateFields((err,val) => {
-            if(!err){
-                console.log(val)
-                $.ajax({
-                    type: "GET",
-                    url: serveUrl + 'hsr-order/getTrainInfo?access_token=' + User.appendAccessToken().access_token,
-                    data: {
-                        trainTime: moment(val.trainTime,'YYYY-MM-DD').format('YYYY-MM-DD'),
-                        trainCode: val.trainCode,
-                    },
-                    success: function (data) {
-                        console.log(data)
-                        if(data.status == 200 ){
-                            if(data.data != null){
-                                //Message.success(data.msg);
-                                const place = data.data.trainPos.map((v,i) => {
-                                    return (<Option key={v.stationName}>{v.stationName}</Option>)
-                                })
-                                _this.setState({
-                                    train:data.data,
-                                    placeList:place,
-                                    startPlaceList:place.slice(0,-1),
-                                    destinationList:place.slice(1),
-                                })
-                            }else{
-                                //Message.error(data.msg);
-                            }
+        const val = this.props.form.getFieldsValue()
+        if(!val.trainTime && !val.trainCode){
+            Message.success('请填写高铁日期和高铁车次')
+        }else{
+            $.ajax({
+                type: "GET",
+                url: serveUrl + 'hsr-order/getTrainInfo?access_token=' + User.appendAccessToken().access_token,
+                data: {
+                    trainTime: val.trainTime.format('YYYY-MM-DD'),
+                    trainCode: val.trainCode,
+                },
+                success: function (data) {
+                    if(data.status == 200 ){
+                        if(data.data != null){
+                            //Message.success(data.msg);
+                            const place = data.data.trainPos.map((v,i) => {
+                                return (<Option className='w' key={v.stationName}>{v.stationName}</Option>)
+                            })
+                            _this.setState({
+                                train:data.data,
+                                placeList:place,
+                                startPlaceList:place.slice(0,-1),
+                                destinationList:place.slice(1),
+                            })
+                            
                         }else{
                             //Message.error(data.msg);
                         }
+                    }else{
+                        //Message.error(data.msg);
                     }
-                        
-                })
-            }
-
-        })
+                }
+                    
+            })
+        }
         
     }
+
 
     //切换出发地时改变后续值
     startPlaceChange = (value) => {
         const _this = this
-        console.log(value)
         const place = this.state.placeList
         this.state.train.trainPos.map((v,i) => {
             if(v.stationName == value){
-                console.log(value)
+                
                 _this.setState({ 
                     destinationList: place.slice(i+1),
                 })
@@ -236,14 +248,14 @@ class AddAppointment extends React.Component {
                 data:value
             },
             success: function (data) {
-                console.log(data)
+                
                 if(data.status == 200 ){
                     if(data.data != null){
                         //Message.success(data.msg);
                         const productList = data.data.rows.map((v,i) => {
                             return (<Option key={v.productId+'&'+v.name}>{v.name}</Option>)
                         })
-                        console.log(productList)
+                        
                         _this.setState({
                             product:productList,
                             productList:data.data.rows
@@ -262,7 +274,6 @@ class AddAppointment extends React.Component {
     //请求登记人---员工
     registerChange = (value) => {
         const _this = this
-        console.log(value)
         $.ajax({
             type: "GET",
             url: serveUrl + 'hsr-role/getEmployeeDropdownList?access_token=' + User.appendAccessToken().access_token,
@@ -270,12 +281,13 @@ class AddAppointment extends React.Component {
                 name:value
             },
             success: function (data) {
-                console.log(data)
+                
                 if(data.status == 200 ){
                     if(data.data != null){
                         //Message.success(data.msg);
                         const register = data.data.map((v,i)=>{
-                            return <AutoCompleteOption key={v.id}>{v.value}</AutoCompleteOption>;
+                            const key = v.id+'&'+v.value
+                            return <AutoCompleteOption key={key}>{v.value}</AutoCompleteOption>;
                         })
                         _this.setState({
                             registerName: register,
@@ -293,125 +305,89 @@ class AddAppointment extends React.Component {
         });
     }
 
+    //获取焦点时设置li宽度
+    setWidth = () => {
+        $('.w').css({width:180})
+    }
+
     handleOk = () => {
         const _this = this
-        console.log(this.state.passengerList)
+        
         this.props.form.validateFields((err, values) => {
             if(!err){
-                console.log(values)
-                 //高铁日期
-                values.trainTime = moment(values.trainTime).format('YYYY-MM-DD')
-                //开车时间
-                values.startTime = moment(values.startTime).format("YYYY-MM-DD HH:mm:ss")
-                //检票时间
-                values.checkTime = moment(values.checkTime).format("YYYY-MM-DD HH:mm:ss")
-                //客户到达时间
-                values.travellerComeTime = moment(values.travellerComeTime).format("YYYY-MM-DD HH:mm:ss")
-                //客户离开时间
-                values.travellerLeaveTime = moment(values.travellerLeaveTime).format("YYYY-MM-DD HH:mm:ss")
-                //休息室
-                const product = values.productName.split('&')
-                values.productId = product[0]
-                values.productName = product[1]  
-                //是否收费
-                values.isCharge =  values.isCharge == '是' ? 1 : 0                    
-                //是否删除
-                values.isDeleted = 0
-                //状态
-                values.status = 1
-                //添加旅客
-                values.travellerData = _this.state.passengerList
-                //客户名
-                const clientName = values.clientName.split('&')
-                values.clientId = clientName[0]
-                values.clientName = clientName[1]
-                //登记人
-                const register = values.register.split('&')
-                values.register = register[0]
-                values.registerName = clientName[1]
-                console.log(values)
-                $.ajax({
-                    type: "POST",
-                    contentType:'application/x-www-form-urlencoded',
-                    url: serveUrl + "hsr-order/updateOrder?access_token=" + User.appendAccessToken().access_token,
-                    data: JSON.stringify({data:values}),      
-                    success: function (data) {
-                        console.log(data)
-                        if(data.status == 200 ){
-                            if(data.data != null){
-                                Message.error(data.msg);
-                            }else{
-                                Message.success(data.msg);
-                                hashHistory.push('/order')
+                //判断是否填写完整
+                if(values.clientName == ''){
+                    Message.error('请填写客户名');
+                }else if(values.productName == ''){
+                    Message.error('请填写休息室');
+                }else if(values.travellerComeTime == undefined){
+                    Message.error('请填写旅客到达时间');
+                }else if(values.register == ''){
+                    Message.error('请填写登记人');
+                }else{
+                    //高铁日期
+                    values.trainTime = moment(values.trainTime).format('YYYY-MM-DD')
+                    //开车时间
+                    values.startTime = moment(values.startTime).format("YYYY-MM-DD HH:mm:ss")
+                    //检票时间
+                    values.checkTime = moment(values.checkTime).format("YYYY-MM-DD HH:mm:ss")
+                    //客户到达时间
+                    values.travellerComeTime = moment(values.travellerComeTime).format("YYYY-MM-DD HH:mm:ss")
+                    //客户离开时间
+                    values.travellerLeaveTime = moment(values.travellerLeaveTime).format("YYYY-MM-DD HH:mm:ss")
+                    //休息室
+                    const product = values.productName.split('&')
+                    values.productId = product[0]
+                    values.productName = product[1]  
+                    //是否收费
+                    //values.isCharge =  values.isCharge ? 1 : 0                    
+                    //是否删除
+                    values.isDeleted = 0
+                    //状态
+                    values.status = 1
+                    //添加旅客
+                    values.travellerData = _this.state.passengerList
+                    //客户名
+                    const clientName = values.clientName.split('&')
+                    values.clientId = clientName[0]
+                    values.clientName = clientName[1]
+                    //登记人
+                    const register = values.register.split('&')
+                    if(register.length > 1){
+                        values.register = register[0]
+                        values.registerName = clientName[1]
+                        
+                        $.ajax({
+                            type: "POST",
+                            contentType:'application/x-www-form-urlencoded',
+                            url: serveUrl + "hsr-order/updateOrder?access_token=" + User.appendAccessToken().access_token,
+                            data: JSON.stringify({data:values}),      
+                            success: function (data) {
+                                
+                                if(data.status == 200 ){
+                                    if(data.data != null){
+                                        Message.error(data.msg);
+                                    }else{
+                                        Message.success(data.msg);
+                                        hashHistory.push('/order')
+                                    }
+                                }else{
+                                    Message.error(data.msg);
+                                }
                             }
-                        }else{
-                            Message.error(data.msg);
-                        }
+                        })
+                    }else{
+                        Message.error('该登记人没有权限')
                     }
-                })
+                    
+                }
             }
         })
     }
 
     handleCancle = () => {
-        const _this = this
-        this.props.form.validateFields((err, values) => {
-            if(!err){
-                console.log(values)
-                 //高铁日期
-                values.trainTime = moment(values.trainTime).format('YYYY-MM-DD')
-                //开车时间
-                values.startTime = moment(values.startTime).format("YYYY-MM-DD HH:mm:ss")
-                //检票时间
-                values.checkTime = moment(values.checkTime).format("YYYY-MM-DD HH:mm:ss")
-                //客户到达时间
-                values.travellerComeTime = moment(values.travellerComeTime).format("YYYY-MM-DD HH:mm:ss")
-                //客户离开时间
-                values.travellerLeaveTime = moment(values.travellerLeaveTime).format("YYYY-MM-DD HH:mm:ss")
-                //休息室
-                const product = values.productName.split('&')
-                values.productId = product[0]
-                values.productName = product[1]   
-                //是否收费
-                values.isCharge =  values.isCharge == '是' ? 1 : 0                   
-                //是否删除
-                values.isDeleted = 0
-                //状态
-                values.status = 0
-                //添加旅客
-                values.travellerData = this.state.passengerList
-                //客户名
-                const clientName = values.clientName.split('&')
-                values.clientId = clientName[0]
-                values.clientName = clientName[1]
-                //登记人
-                const register = values.register.split('&')
-                values.register = register[0]
-                values.registerName = clientName[1]
-                console.log(values)
-
-                $.ajax({
-                    type: "POST",
-                    contentType:'application/x-www-form-urlencoded',
-                    url: serveUrl + "hsr-order/updateOrder?access_token=" + User.appendAccessToken().access_token,
-                    data: JSON.stringify({data:values}),      
-                    success: function (data) {
-                        console.log(data)
-                        if(data.status == 200 ){
-                            if(data.data != null){
-                                Message.error(data.msg);
-                                
-                            }else{
-                                Message.success(data.msg);
-                                hashHistory.go('/order')
-                            }
-                        }else{
-                            Message.error(data.msg);
-                        }
-                    }
-                })
-            }
-        })
+        this.props.form.resetFields()
+        hashHistory.push('/order')
     }
 
     
@@ -420,8 +396,8 @@ class AddAppointment extends React.Component {
         
     }
     
-    render () {
-        const _this = this
+    render  () {
+        const _this = this;
 
         const columns = [
             {
@@ -485,6 +461,7 @@ class AddAppointment extends React.Component {
                                         <AutoComplete
                                             dataSource={_this.state.clientName}
                                             onSearch={_this.clientChange.bind(_this)}
+                                            onSelect={_this.selectClient.bind(_this)}
                                             placeholder="请输入客户名称"
                                         >
                                         </AutoComplete>
@@ -568,7 +545,7 @@ class AddAppointment extends React.Component {
                                     {getFieldDecorator('startPlace', {
                                         
                                     })(
-                                        <Select onChange={_this.startPlaceChange.bind(_this)} placeholder="请选择出发地">
+                                        <Select onFocus={_this.setWidth.bind(_this)} onChange={_this.startPlaceChange.bind(_this)} placeholder="请选择出发地">
                                             {_this.state.startPlaceList}
                                         </Select>
                                     )}
@@ -594,7 +571,7 @@ class AddAppointment extends React.Component {
                                     {getFieldDecorator('destinationPlace', {
                                         
                                     })(
-                                        <Select placeholder="请选择目的地">
+                                        <Select onFocus={_this.setWidth.bind(_this)} placeholder="请选择目的地">
                                             {_this.state.destinationList}
                                         </Select>
                                     )}
@@ -612,7 +589,9 @@ class AddAppointment extends React.Component {
                                     label="休息室名称"
                                 >
                                     {getFieldDecorator('productName', {
-                                        
+                                         rules: [{
+                                            required: true,message: '请输入休息室名称!',
+                                        }],
                                     })(
                                         <Select placeholder="请选择休息室名称">
                                             {_this.state.product}
@@ -625,7 +604,9 @@ class AddAppointment extends React.Component {
                                         label="客户到达时间"
                                     >
                                     {getFieldDecorator('travellerComeTime', {
-                                        
+                                        rules: [{
+                                            required: true,message: '请输入到达时间!',
+                                        }],
                                     })(
                                         <DatePicker placeholder="请选择客户到达时间" showTime format="HH:mm" style={{width:'300px'}} />
                                     )}
@@ -679,9 +660,9 @@ class AddAppointment extends React.Component {
                                        
                                     })(
                                         <Select placeholder="请选择">
-                                            <Option value="刷卡">刷卡</Option>
-                                            <Option value="现金">现金</Option>
-                                            <Option value="网络">网络</Option>
+                                            <Option value="2">现金</Option>
+                                            <Option value="3">刷卡</Option>
+                                            <Option value="4">网络</Option>
                                         </Select>
                                     )}
                                 </FormItem>
@@ -711,7 +692,9 @@ class AddAppointment extends React.Component {
                                     label="登记人" 
                                 >
                                     {getFieldDecorator('register', {
-                                        
+                                        rules: [{
+                                            required: true,message: '请输入登记人!',
+                                        }],
                                     })(
                                          <AutoComplete
                                             dataSource={_this.state.registerName}

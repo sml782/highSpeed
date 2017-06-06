@@ -5,7 +5,7 @@ import UpdateProducts from './UpdateProducts'
 
 import React from 'react';
 import { hashHistory } from 'react-router';
-import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete} from 'antd';
+import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete,Spin} from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData, access_token} from '../../utils/config';
@@ -22,6 +22,7 @@ class ServiceList extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            searchData:{},
             productListDate: [],
             productListDateLength:0,
             productListDateCurrent:1,
@@ -42,14 +43,15 @@ class ServiceList extends React.Component {
             trainStation:[],
             handleKey:undefined,
             selectedProduct:{},
+            loading:'block',
         }
     }
 
      componentWillMount() {
-        //  if(User.isLogin()){
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+        if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
         this.getInitList(this.state.productListDateCurrent,this.state.productsListDatePageSize)
     }
     componentDidMount=()=>{
@@ -62,13 +64,14 @@ class ServiceList extends React.Component {
         $("table").css({border:'1px solid #f0f0f0'});
     }
     handleSubmit =(e)=>{
-       console.log(e)
+       
        e.preventDefault()
     }
    
      getInitList(page,rows,search){
         const data = [];
         const _this = this;
+        _this.setState({loading:'block'})
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
                 $.ajax({
@@ -80,7 +83,7 @@ class ServiceList extends React.Component {
                         data:search
                         },
                     success: function(data){
-                        console.log(data)
+                        
                          if(data.status == 200 ){
                             if(data.data != null){
                                 data.data.rows.map((v,index)=>{
@@ -97,7 +100,7 @@ class ServiceList extends React.Component {
                         }else{
                             Message.error(data.msg);
                         }
-                        
+                        _this.setState({loading:'none'})
                     }
                 });
             }
@@ -106,11 +109,9 @@ class ServiceList extends React.Component {
 
     //搜索
     searchProduct = () => {
-        this.props.form.validateFields((err,val) => {
-            if(!err){
-                this.getInitList(this.state.productListDateCurrent,this.state.productsListDatePageSize,val.search)
-            }
-        })
+        const searchData = this.props.form.getFieldValue('search');
+        this.setState({searchData:searchData,productListDateCurrent:1},() => {this.getInitList(this.state.productListDateCurrent,this.state.productsListDatePageSize,searchData)})
+        
     }
 
     //获取高铁站
@@ -118,7 +119,7 @@ class ServiceList extends React.Component {
         const _this = this
         if(value !== ''){
             getTrainStation(value,(station) => {
-                console.log(station)
+                
                 if(station){
                     const trainStation = station.map((s) => {
                         return <AutoCompleteOption key={s.no+'&'+s.value}>{s.value}</AutoCompleteOption>;
@@ -165,7 +166,7 @@ class ServiceList extends React.Component {
     showAdd = (record) => {
         const _this = this
         this.setState({ visibleAdd:true })
-        console.log(record)
+        
         var addKey = this.state.addKey
         this.setState({ addKey:++addKey })
     }
@@ -185,7 +186,7 @@ class ServiceList extends React.Component {
         const _this = this
         this.setState({ visibleUpdate:true })
         if(!record.dispatchConfig){
-            console.log(record)
+            
             var updateKey = this.state.updateKey
             this.setState({ updateKey:++updateKey, handleKey: record.productId,selectedProduct:record })
         }else{
@@ -201,6 +202,7 @@ class ServiceList extends React.Component {
     //取消添加
     handleUpdateCancel(){
         this.setState({visibleUpdate:false,selectedProduct: {}})
+        this.getInitList(this.state.productListDateCurrent,this.state.productsListDatePageSize)
     }
 
     showTotal(total) {
@@ -282,14 +284,15 @@ class ServiceList extends React.Component {
             total: this.state.productListDateLength,
             size:'small',
             showTotal:this.showTotal ,
+            current:_this.state.productListDateCurrent,
             onShowSizeChange(current, pageSize) {
                 _this.state.productListDateCurrent = current;
                 _this.state.productsListDatePageSize = pageSize;
-                _this.getInitList(_this.state.productListDateCurrent,_this.state.productsListDatePageSize);
+                _this.getInitList(_this.state.productListDateCurrent,_this.state.productsListDatePageSize,_this.state.searchData);
             },
             onChange(current) {
                 _this.state.productListDateCurrent = current;
-                _this.getInitList(_this.state.productListDateCurrent,_this.state.productsListDatePageSize);
+                _this.getInitList(_this.state.productListDateCurrent,_this.state.productsListDatePageSize,_this.state.searchData);
             },
 
       };
@@ -301,7 +304,6 @@ class ServiceList extends React.Component {
                     <div className="top-bar"></div>
                     <div className="breadcrumb">
                         <Breadcrumb>
-                            <Breadcrumb.Item>产品管理</Breadcrumb.Item>
                             <Breadcrumb.Item>休息室管理</Breadcrumb.Item>
                         </Breadcrumb>
                     </div>
@@ -333,10 +335,11 @@ class ServiceList extends React.Component {
                             </div>
                         </Col>
                         <Col span={10} style={{float:'right'}}>
-                            <div className='btn-add' style={{marginLeft:'72%'}} onClick={_this.showAdd.bind(_this)}><span>添加休息室</span><img src={require('../../assets/images/add.png')} className='addImg'/></div>
+                            <div className='btn-add' style={{display:'inline-block',marginLeft:'45%'}} onClick={_this.showAdd.bind(_this)}><span>添加休息室</span><img src={require('../../assets/images/add.png')} className='addImg'/></div>
                         </Col>
                     </Row>
                     <div className="search-result-list" >
+                        <Spin size='large' tip='加载中' style={{display:this.state.loading}} />
                         <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={_this.state.productListDate}  className="serveTable"/>
                     </div>
                         

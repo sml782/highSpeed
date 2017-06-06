@@ -9,6 +9,7 @@ import { Breadcrumb, Form, Row, Col, Input, Button, Icon, Select, Popconfirm, me
 import { Link } from 'react-router'
 import $ from 'jquery'
 import moment from 'moment'
+import { serveUrl, User, cacheData} from '../../utils/config';
 
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
@@ -22,7 +23,10 @@ class System extends React.Component {
     }
 
     componentWillMount () {
-
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
     }
 
     componentDidMount () {
@@ -41,7 +45,7 @@ class System extends React.Component {
     handleSearch = (e) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
-            console.log('Received values of form: ', values);
+            
         });
     }
 

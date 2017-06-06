@@ -29,10 +29,10 @@ class AddPartLounge extends React.Component {
     }
 
      componentWillMount() {
-        //  if(User.isLogin()){
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
         //获取高铁列表
         const _this = this;
         $.ajax({
@@ -70,6 +70,13 @@ class AddPartLounge extends React.Component {
             data: { access_token: User.appendAccessToken().access_token,name:e},
             success: function(data) {
                 if (data.status == 200) {
+                    const Adata = [];
+                    data.data.map((k) => {
+                        Adata.push(k.value);
+                    })
+                    _this.setState({
+                        stationList: Adata
+                    })
                     if(data.data.length == 1){
                         $.ajax({
                             type: "GET",

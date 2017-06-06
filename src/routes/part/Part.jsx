@@ -2,7 +2,7 @@ import '../system/system.less'
 
 import React from 'react';
 import { hashHistory } from 'react-router';
-import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete} from 'antd';
+import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete, Spin} from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData,access_token} from '../../utils/config';
@@ -31,14 +31,15 @@ class ServiceList extends React.Component {
             menuIds:[],
             visibleDel:false,
             clientTypeResult:[],
+            loading:'block',
         }
     }
 
      componentWillMount() {
-        //  if(User.isLogin()){
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
 
     }
     componentDidMount=()=>{
@@ -59,6 +60,7 @@ class ServiceList extends React.Component {
      getInitList(page,rows){
         const data = [];
         const _this = this;
+        _this.setState({loading:'block'})
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
                 $.ajax({
@@ -69,7 +71,7 @@ class ServiceList extends React.Component {
                         rows:rows,
                     },
                     success: function(data){
-                        console.log(data)
+                        
                         if(data.status == 200){
                             data.data.rows.map((v,index)=>{
                                 v.key = v.roleId
@@ -79,6 +81,7 @@ class ServiceList extends React.Component {
                                 partListDateLength:data.data.total
                             })
                         }
+                        _this.setState({loading:'none'})
                     }
                 });
             }
@@ -217,6 +220,7 @@ class ServiceList extends React.Component {
                     <Row>
                         <div className='btn-add' style={{marginLeft:'87%'}} onClick={this.addPart}><span>新增角色</span><img src={require('../../assets/images/add.png')} className='addImg'/></div>
                         <div className="search-result-list" >
+                            <Spin size='large' tip='加载中' style={{display:this.state.loading}} />
                             <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={this.state.partListDate}  className="serveTable"/>
                         </div>
                     </Row>

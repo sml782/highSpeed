@@ -69,11 +69,10 @@ class AddMenu extends React.Component {
         return map[key] || [];
     }
      componentWillMount() {
-        //   if(User.isLogin()){
-              
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+          if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
         const _this = this
         $.ajax({
             type: "GET",
@@ -90,6 +89,7 @@ class AddMenu extends React.Component {
     componentDidMount=()=>{
         $(".ant-breadcrumb-separator").html(">");
         $(".ant-breadcrumb-separator").css({color:'#333'});
+        $('.btn-add').css({background:'transparent'});
     }
 
     handleSubmit =(e)=>{

@@ -21,10 +21,10 @@ class AddClient extends React.Component {
     }
 
      componentWillMount() {
-        //   if(User.isLogin()){
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
         
     }
 
@@ -62,14 +62,11 @@ class AddClient extends React.Component {
                             </FormItem>
                             <FormItem {...formItemLayout} label="客户类型">
                                 {getFieldDecorator('type', {})(
-                                    <Select placeholder="请选择">
-                                        <Option value="类型1">类型1</Option>
-                                        <Option value="类型2">类型2</Option>
-                                    </Select>
-                                    )}
+                                    <Input placeholder="请输入客户类型" />
+                                )}
                             </FormItem>
                             <FormItem label="是否验证卡号" {...formItemLayout}>
-                                {getFieldDecorator('ifCheckStr', {})(
+                                {getFieldDecorator('isCheckStr', {})(
                                     <Select placeholder="请选择">
                                         <Option value="1">是</Option>
                                         <Option value="0">否</Option>
@@ -77,7 +74,9 @@ class AddClient extends React.Component {
                                     )}
                             </FormItem>
                             <FormItem label="是否收费" {...formItemLayout} >
-                                {getFieldDecorator('ifChargeStr', {})(
+                                {getFieldDecorator('isChargeStr', {
+                                    rules: [{ required:true ,message: '请选择!' }],
+                                })(
                                     <Select placeholder="请选择">
                                         <Option value="1">是</Option>
                                         <Option value="0">否</Option>
@@ -98,8 +97,8 @@ class AddClient extends React.Component {
                                                         data: [{
                                                             name: _this.props.form.getFieldValue('name'),
                                                             type: _this.props.form.getFieldValue('type'),
-                                                            ifCheck:parseInt(_this.props.form.getFieldValue('ifCheckStr')),
-                                                            ifCharge:parseInt(_this.props.form.getFieldValue('ifChargeStr'))
+                                                            isCheck:parseInt(_this.props.form.getFieldValue('isCheckStr')),
+                                                            isCharge:parseInt(_this.props.form.getFieldValue('isChargeStr'))
                                                         }]
                                                     };
                                                     $.ajax({

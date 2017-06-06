@@ -12,28 +12,28 @@ class SiderBar extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            current: '0',
+            current: ['0'],
             roleId: 1,
             username:undefined,
             status:true,
             siderBar:[],
             totalTitle:'订单管理',
         }
+        this.refreshMenu = this.refreshMenu.bind(this)
     }
 
     handleClick = (e) => {
         this.setState({
-            current: e.key
+            current: [e.key]
         })
     }
 
     componentWillMount() {
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
         
-        // if (User.isLogin()) {
-            
-        // } else {
-        //     hashHistory.push('/login');
-        // }
         const _this = this
         $.ajax({
             type: "GET",
@@ -46,46 +46,75 @@ class SiderBar extends React.Component {
             }
         })
     }
+    componentDidMount() {
+         const _this = this
+         this.getUser()
+         this.refreshMenu(this.props.location.pathname)
+         $.ajax({
+            type: "GET",
+            url: serveUrl+"hsr-role/getRoleById?access_token="+ User.appendAccessToken().access_token,
+            success: function(data){
+                
+                _this.setState({
+                    username: data.data.name
+                })
+            }
+        })
+    }
 
-    componentDidMount(){
-        
+    //刷新对应key
+    refreshMenu = (pathname) => {
+        var key = '';
+        switch (pathname){
+            case '/order':
+                key = '0';
+                break;
+            case '/addAppointment':
+                key = '0';
+                break;
+            case '/updateAppointment':
+                key = '0';
+                break;
+            case '/serviceBillings':
+                key = '1';
+                break;
+            case '/system':
+                key = '2';
+                break;
+            case '/editPart':
+                key = '2';
+                break;
+            case '/addPart':
+                key = '2';
+                break;
+            case '/addMenu':
+                key = '2';
+                break;
+            case '/employeeList':
+                key = '3';
+                break;
+            case '/clientManagement':
+                key = '4';
+                break;
+            case '/products':
+                key = '5';
+                break;
+        }
+        this.setState({
+            current: [key]
+        })
+
     }
 
     isLogin(){
         return false
     }
 
-    componentDidMount() {
-        this.getUser()
-    }
 
-    changeMenu = (v,i,s) => {
-        console.log(v,i,s)
-    }
 
     loginOut = () =>{
-        const _this = this
-        $.ajax({
-            type: "GET",
-            url: serveUrl + 'guest-order/getAirportCode?access_token=' + User.appendAccessToken().access_token,
-            success: function(data){
-                let url;
-                if(data.data.airportCode == 'SHA'){
-                    url = '/login'+data.data.airportCode;
-                    _this.setState({
-                        png:1
-                    })
-                }else{
-                    url = '/login';
-                    _this.setState({
-                        png:0
-                    })
-                
-                }
-                User.logout();
-                hashHistory.push(url);
-            }
-        })
+        User.logout();
+        hashHistory.push('login');
     }
 
     getUser = () => {
@@ -107,8 +136,8 @@ class SiderBar extends React.Component {
                     <Menu theme="dark"
                         onClick={this.handleClick}
                         style={{ width: 185 }}
+                        selectedKeys={this.state.current}
                         defaultOpenKeys={['sub1', 'sub2']}
-                        defaultSelectedKeys={[this.state.current]}
                         onSelect={this.changeMenu}
                         mode="inline"
                     >
@@ -118,7 +147,7 @@ class SiderBar extends React.Component {
                 <div id="rightWrap">
                     <Menu mode="horizontal">
                         <SubMenu title={<span><Icon type="user" />{ this.state.username }</span>}>
-                            <Menu.Item key="setting:1" id='logout' onClick={this.loginOut}><img className='logoutList' src={require('../assets/images/logout.png')}/><span id='logoutWord'>退出登录</span></Menu.Item>
+                            <Menu.Item key="setting:1" id='logout' ><img className='logoutList' src={require('../assets/images/logout.png')}/><span id='logoutWord' onClick={this.loginOut}>退出登录</span></Menu.Item>
                         </SubMenu>
                     </Menu>
                     <div className="right-box">

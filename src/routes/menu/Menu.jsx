@@ -1,7 +1,7 @@
 import './menu.less'
 import React from 'react';
 import { hashHistory } from 'react-router';
-import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Menu,Modal } from 'antd';
+import {Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,message,Table,Checkbox,Menu,Modal,Spin } from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData, access_token} from '../../utils/config';
@@ -45,7 +45,8 @@ class ServiceList extends React.Component {
             visible: false,
             reviseId:null,
             visibleDel:false,
-            menuId:null
+            menuId:null,
+            loading:'block',
         }
     }
 
@@ -77,11 +78,10 @@ class ServiceList extends React.Component {
         return map[key] || [];
     }
      componentWillMount() {
-        //   if(User.isLogin()){
-              
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+          if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
          this.getInit()
     }
     componentDidMount=()=>{
@@ -96,7 +96,8 @@ class ServiceList extends React.Component {
     }
     getInit =()=>{
         this.setState({
-            menuListDate: []
+            menuListDate: [],
+            loading:'block',
         })
         const _this = this
         $.ajax({
@@ -107,9 +108,10 @@ class ServiceList extends React.Component {
                 roleId:1
             },
             success: function(data){
-                console.log(data)
+                
                 _this.setState({
-                      menuListDate:data.data
+                      menuListDate:data.data,
+                      loading:'none',
                 })
             }
         })
@@ -149,34 +151,29 @@ class ServiceList extends React.Component {
         });
     }
     //删除确认
-    handleOkDel = () => {
-        setTimeout(() => {
-            this.setState({
-                visibleDel: false
-            });
-            //删除菜单
-            const _this = this;
-            $.ajax({
-                type: "POST",
-                contentType: 'application/json;charset=utf-8',
-                url: serveUrl + "hsr-role/deleteMenus?access_token=" + User.appendAccessToken().access_token,
-                data: JSON.stringify({
-                    data: [parseInt(_this.state.menuId)]
-                }),
-                success: function (data) {
-                    if(data.status == 200 ){
-                        if(data.data != null){
-                            message.error(data.data);
-                        }else{
-                            message.success(data.msg);
-                        }
+    handleOkDel = (record,e) => {
+        //删除菜单
+        const _this = this;
+        $.ajax({
+            type: "POST",
+            contentType: 'application/json;charset=utf-8',
+            url: serveUrl + "hsr-role/deleteMenus?access_token=" + User.appendAccessToken().access_token,
+            data: JSON.stringify({
+                data: [parseInt(record.menuId)]
+            }),
+            success: function (data) {
+                if(data.status == 200 ){
+                    if(data.data != null){
+                        message.error(data.data);
                     }else{
-                        message.error(data.msg);
+                        message.success(data.msg);
                     }
-                    _this.getInit()
+                }else{
+                    message.error(data.msg);
                 }
+                _this.getInit()
+            }
             });
-        }, 1000);
     }
     //删除取消
     handleCancelDel = () => {
@@ -228,8 +225,8 @@ class ServiceList extends React.Component {
                 return (
                         <div className="order">
                             <span onClick={_this.revise.bind(_this,record)} className='listRefresh'>编辑</span>
-                            <Popconfirm title="确认删除?" onConfirm={() => _this.showModalDel.bind(_this,record)}>
-                            <span  style={{marginLeft:4}} className='listCancel'>删除</span>
+                            <Popconfirm title="确认删除?" onConfirm={_this.handleOkDel.bind(_this,record)}>
+                                <span style={{marginLeft:4}} className='listCancel'>删除</span>
                             </Popconfirm>
                         </div>
                         )
@@ -255,6 +252,7 @@ class ServiceList extends React.Component {
                  <div className="box">
                     <div className='btn-add' style={{marginLeft:'87%'}} onClick={this.addMenuBtn}><span>新增菜单</span><img src={require('../../assets/images/add.png')} className='addImg'/></div>    
                     <div className="search-result-list" >
+                        <Spin size='large' tip='加载中' style={{display:this.state.loading}} />
                         <Table style={{marginTop:20}} pagination={pagination} columns={columns} rowKey="menuId" dataSource={_this.state.menuListDate} className="serveTable"/>
                     </div>
                  </div>

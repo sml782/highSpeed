@@ -7,6 +7,7 @@ import { Breadcrumb, Form, Row, Col, Input, Button, Icon, Select, Popconfirm, me
 import { Link } from 'react-router'
 import $ from 'jquery'
 import moment from 'moment'
+import { serveUrl, User, cacheData, access_token} from '../../utils/config';
 
 const FormItem = Form.Item;
 const AutoCompleteOption = AutoComplete.Option;
@@ -20,12 +21,15 @@ class Passenger extends React.Component {
     }
 
     componentWillMount () {
-
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
     }
 
     componentDidMount () {
         //TODO AJAX
-        //console.log($('.addp').parent().parent())
+        //
         $('.addp').parent().parent().next('.ant-modal-footer').remove()
         const values = this.props.values
         if(values.travellerName){
@@ -40,7 +44,10 @@ class Passenger extends React.Component {
     }
 
     componentWillUpdate () {
-
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
     }
 
 

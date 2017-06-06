@@ -14,7 +14,7 @@ const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
 
 function callback(key) {
-  console.log(key);
+  
 }
 
 class ServiceBillings extends React.Component {
@@ -27,7 +27,10 @@ class ServiceBillings extends React.Component {
     }
 
     componentWillMount () {
-
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
     }
 
     componentDidMount () {
@@ -46,7 +49,7 @@ class ServiceBillings extends React.Component {
     handleSearch = (e) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
-            console.log('Received values of form: ', values);
+            
         });
     }
 

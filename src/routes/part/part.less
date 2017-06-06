@@ -32,3 +32,15 @@ td{text-align: center}
 .has-error.has-feedback:after{
     content:'';
 }
+
+//表格加载中
+.search-result-list{
+    position: relative;
+    .ant-spin{
+        position: absolute;
+        z-index: 9999;
+        top:200px;
+        left: 50%;
+        margin-left: -16px;
+    }
+}

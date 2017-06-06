@@ -44,17 +44,17 @@ class AddEmployee extends React.Component {
         // }
     }
     componentDidMount(){
-        console.log(this.props)
+        
         $('.ant-modal-footer').eq(1).remove()
     }
 
 
     handleSubmit =(e)=>{
-        console.log(e)
+        
         e.preventDefault()
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
-              console.log(values);
+              
             }
         });
     }
@@ -86,7 +86,7 @@ class AddEmployee extends React.Component {
                     values.trainStationName = arr[1]
                     values.trainStationId = arr[0]
                     values.sex = parseInt(values.sex)
-                    console.log(values)
+                    
                     $.ajax({
                         type: "POST",
                         contentType: 'application/json;charset=utf-8',

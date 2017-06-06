@@ -5,7 +5,7 @@ import UpdateEmployee from './UpdateEmplayee'
 
 import React from 'react';
 import { hashHistory } from 'react-router';
-import { Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete } from 'antd';
+import { Breadcrumb,Form, Row, Col, Input, Button, Icon,Select,Popconfirm,Message,Table,Checkbox,Modal,AutoComplete,Spin } from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import DeleteDialog from '../DeleteDialog';//引入删除弹框
@@ -43,10 +43,10 @@ class ServiceList extends React.Component {
     }
 
     componentWillMount() {
-        //  if(User.isLogin()){
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
     }
     componentDidMount=()=>{
         $(".ant-breadcrumb-separator").html(">")
@@ -61,11 +61,11 @@ class ServiceList extends React.Component {
         
     }
     handleSubmit =(e)=>{
-        console.log(e)
+        
         e.preventDefault()
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
-              console.log(values);
+              
             }
         });
     }
@@ -73,6 +73,7 @@ class ServiceList extends React.Component {
     getInitList(page,rows){
         const data = [];
         const _this = this;
+        _this.setState({loading:'block'})
         $.ajax({
             type: "GET",
             url: serveUrl + "hsr-role/getEmployeeList?access_token=" + User.appendAccessToken().access_token,
@@ -81,7 +82,7 @@ class ServiceList extends React.Component {
                 rows:rows,
                 },
             success: function(data){
-                console.log(data)
+                
                 if(data.status == 200 ){
                     if(data.data != null){
                         data.data.rows.map((v,index)=>{
@@ -96,14 +97,14 @@ class ServiceList extends React.Component {
                 }else{
                     Message.error('获取员工列表失败')
                 }
-                
+                _this.setState({loading:'none'})
             }
         });
     }
 
     //删除弹框
     showModalDel = (record) => {
-        console.log(record.employeeId)
+        
         this.setState({
             visibleDel: true,
             employeeId:record.employee_id
@@ -112,7 +113,7 @@ class ServiceList extends React.Component {
     //删除确认
     handleOkDel = (record) => {
         const _this = this
-        console.log(record)
+        
         $.ajax({
             type: "POST",
             contentType: 'application/json;charset=utf-8',
@@ -159,7 +160,7 @@ class ServiceList extends React.Component {
     updateEmployeeBtn=(record)=>{
         this.setState({ visibleUpdate: true,updateKey:Math.random() * Math.random() })
         const _this = this
-        console.log(record)
+        
         _this.setState({
             returnData:record
         })            
@@ -281,6 +282,7 @@ class ServiceList extends React.Component {
                     <Row>
                         <div className='btn-add' style={{marginLeft:'87%'}} onClick={this.addEmployeeBtn}><span>添加员工</span><img src={require('../../assets/images/add.png')} className='addImg'/></div>
                         <div className="search-result-list" >
+                            <Spin size='large' tip='加载中' style={{display:this.state.loading}} />
                             <Table style={{marginTop:20}} columns={columns} pagination={pagination} dataSource={this.state.employeeList}  className="serveTable"/>
                         </div>
                     </Row>

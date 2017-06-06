@@ -8,7 +8,7 @@ import SiderBar from './routes/SiderBar';
 import Login from './routes/login/Login'
 
 //订单管理
-import Order from './routes/order/Order'
+import OrderList from './routes/order/OrderList'
 import AddAppointment from './routes/order/AddAppointment'
 import UpdateAppointment from './routes/order/UpdateAppiontment'
 
@@ -38,8 +38,8 @@ import Products from './routes/products/Products'
 export default (
     <Router history={hashHistory}>
         <Route path="/" component={SiderBar}>
-            <IndexRoute component={Order} />
-            <Route path="order" component={Order} />
+            <IndexRoute component={OrderList} />
+            <Route path="order" component={OrderList} />
             <Route path="addAppointment" component={AddAppointment} />
             <Route path="updateAppointment(/:orderId)" component={UpdateAppointment} />
             <Route path="serviceBillings" component={ServiceBillings} />

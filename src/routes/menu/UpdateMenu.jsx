@@ -21,10 +21,10 @@ class updateMenu extends React.Component {
         }
     }
     componentWillMount() {
-        // if(User.isLogin()){
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+         if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
         const _this = this;
     
         $.ajax({
@@ -32,7 +32,7 @@ class updateMenu extends React.Component {
             url: serveUrl + 'hsr-role/viewMenu?access_token=' + User.appendAccessToken().access_token,
             data:{airportCode:'LJG',menuId:_this.props.name},
             success: function(data){
-            //    console.log(data)
+            //    
                 _this.setState({
                     pId:data.data.pId,
                     menuId:data.data.menuId

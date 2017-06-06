@@ -61,10 +61,10 @@ class ServiceList extends React.Component {
     }
    
     componentWillMount() {
-        //  if(User.isLogin()){
-        // } else{
-        //     hashHistory.push('/login');
-        // }
+        if(User.isLogin()){
+        } else{
+            hashHistory.push('login');
+        }
         
     }
     componentDidMount=()=>{
@@ -201,6 +201,8 @@ class ServiceList extends React.Component {
                                     account: values.account,
                                     productIdList:_this.state.loungeIdList,
                                     menuIdList:_this.state.value,
+                                    roleId:data.user_id,
+                                    isExist:0,
                                 }]
                             }
                             $.ajax({
@@ -322,11 +324,11 @@ class ServiceList extends React.Component {
                             </FormItem>
                         </Col>
                         <Col span={12} style={{marginTop:20}}>
-                            <FormItem labelInValue label="角色描述" {...formItemLayout} required style={{marginLeft:-20}}>
+                            <FormItem labelInValue label="角色密码" {...formItemLayout} required style={{marginLeft:-20}}>
                                 {getFieldDecorator('description', {
-                                    rules: [{ required: true, message: '请输入角色名称!' }],
+                                    rules: [{ required: true, message: '请输入角色密码!' }],
                                 })(
-                                    <Input  placeholder="请输入角色名称" style={{width:358}}  className='required'/>
+                                    <Input  placeholder="请输入角色密码" style={{width:358}}  className='required'/>
                                 )}
                             </FormItem>
                         </Col>

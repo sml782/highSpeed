@@ -44,7 +44,7 @@ class UpdateEmployee extends React.Component {
         // }
     }
     componentDidMount(){
-        console.log(this.props)
+        
         $('.ant-modal-footer').eq(1).remove()
         const handleData = this.props.handleData
         this.props.form.setFieldsValue({
@@ -58,11 +58,11 @@ class UpdateEmployee extends React.Component {
 
 
     handleSubmit =(e)=>{
-        console.log(e)
+        
         e.preventDefault()
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
-              console.log(values);
+              
             }
         });
     }
@@ -97,34 +97,32 @@ class UpdateEmployee extends React.Component {
                     if(arr.length > 1){
                         values.trainStationName = arr[1]
                         values.trainStationId = arr[0]
-                        values.sex = parseInt(values.sex)
-                        values.employeeId = _this.props.handleData.employee_id
-                        console.log(values)
-                        $.ajax({
-                            type: "POST",
-                            contentType: 'application/json;charset=utf-8',
-                            url: serveUrl + "hsr-role/saveOrUpdateEmployee?access_token=" + User.appendAccessToken().access_token,
-                            data: JSON.stringify({
-                                    data:values
-                                }),      
-                            success: function (data) {
-                                if(data.status == 200 ){
-                                    if(data.data != null){
-                                        Message.error(data.data);
-                                    }else{
-                                        Message.success(data.msg);
-                                        _this.props.handleOk()  
-                                    }
-                                }else{
-                                    Message.error(data.msg);
-                                }
-                            }
-                        })
                     }else{
                         Message.error('请输入正确的高铁站');
                     }
                 }
-                
+                values.sex = parseInt(values.sex)
+                values.employeeId = _this.props.handleData.employee_id
+                $.ajax({
+                    type: "POST",
+                    contentType: 'application/json;charset=utf-8',
+                    url: serveUrl + "hsr-role/saveOrUpdateEmployee?access_token=" + User.appendAccessToken().access_token,
+                    data: JSON.stringify({
+                            data:values
+                        }),      
+                    success: function (data) {
+                        if(data.status == 200 ){
+                            if(data.data != null){
+                                Message.error(data.data);
+                            }else{
+                                Message.success(data.msg);
+                                _this.props.handleOk()  
+                            }
+                        }else{
+                            Message.error(data.msg);
+                        }
+                    }
+                })
             }
         })
 

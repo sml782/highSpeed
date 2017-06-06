@@ -10,7 +10,7 @@ function getTrainStation (value,callback) {
             if(data.status == 200 && data.data.length !== 0){
                 //return data.data
                 callback(data.data)
-                //console.log(data.data)
+                //
             }
             
         }
