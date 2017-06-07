@@ -88,9 +88,8 @@ class AddProducts extends React.Component {
                             }else{
                                 Message.error(data.msg);
                             }
-                            _this.props.getInitList(1,10)
-                            }
-                        })
+                        }
+                    })
                     
                 }
             
@@ -182,9 +181,9 @@ class AddProducts extends React.Component {
                         )}
                     >
                         {getFieldDecorator('price', {
-                            
+                            rules: [{ pattern:/\d+/ ,message: '请输入高铁站!' }],
                         })(
-                            <Input placeholder="请输入零售价格" />
+                            <Input type='number' placeholder="请输入零售价格" />
                         )}
                     </FormItem>
         

@@ -59,7 +59,7 @@ class Login extends React.Component {
                     //url:'http://101.37.106.176/oauth/oauth/access_token',
                     data: {
                         grant_type: 'password',
-                        client_id: 'LJG',
+                        client_id: 'HSR',
                         client_secret: 111111,
                         username: $('#user').val(),
                         password: $('#pwd').val(),

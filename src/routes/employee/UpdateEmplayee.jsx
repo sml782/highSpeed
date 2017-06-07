@@ -131,7 +131,7 @@ class UpdateEmployee extends React.Component {
     //取消添加/修改
     handleCancel(){
         this.props.form.resetFields()
-        this.props.handleCancel()
+        this.props.handleOk()
     }
 
     render() {
@@ -196,7 +196,7 @@ class UpdateEmployee extends React.Component {
                         {getFieldDecorator('phone', {
                             rules: [{ required: true, message: '请输入手机号!', pattern:/^1[3|4|5|7|8][0-9]\d{4,8}$/ }],
                         })(
-                            <Input placeholder="请输入手机号" />
+                            <Input type='number' placeholder="请输入手机号" />
                         )}
                     </FormItem>
                     <FormItem

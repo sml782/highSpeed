@@ -166,9 +166,9 @@ columns[2] = [{
   dataIndex: 'productName',
   key:2,
   width:130,
-}, {
-  title: '刷卡人次',
-  dataIndex: 'slotNum',
+},{
+  title: '现金人次',
+  dataIndex: 'cashNum',
   width:110,
   render(text,record) {
       let text1=''
@@ -180,8 +180,8 @@ columns[2] = [{
       return <span>{text1}</span>
   }
 }, {
-  title: '刷卡金额',
-  dataIndex: 'slotPrice',
+  title: '现金金额',
+  dataIndex: 'cashPrice',
   width:110,
   render(text,record) {
       let text1=''
@@ -193,8 +193,8 @@ columns[2] = [{
       return <span>{text1}</span>
   }
 }, {
-  title: '现金人次',
-  dataIndex: 'cashNum',
+  title: '刷卡人次',
+  dataIndex: 'slotNum',
   width:110,
   render(text,record) {
       let text1=''
@@ -206,8 +206,8 @@ columns[2] = [{
       return <span>{text1}</span>
   }
 }, {
-  title: '现金金额',
-  dataIndex: 'cashPrice',
+  title: '刷卡金额',
+  dataIndex: 'slotPrice',
   width:110,
   render(text,record) {
       let text1=''

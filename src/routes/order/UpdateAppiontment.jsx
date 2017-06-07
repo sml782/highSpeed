@@ -86,9 +86,10 @@ class AddAppointment extends React.Component {
                             travellerLeaveTime: data.data.travellerLeaveTime == undefined? null:moment(data.data.travellerLeaveTime,'YYYY-MM-DD HH:mm'),
                             travellerNum:data.data.travellerNum,
                             isCharge:data.data.isCharge?'是':'否',
-                            type:data.data.type?data.data.type:'',
+                            type:data.data.type > 1 ? data.data.type == 2 ? '现金' : data.data.type == 3 ? '刷卡' : data.data.type == 4 ? '网络' : '' : '',
                             price:data.data.price,
                         })
+                        _this.typeShow(data.data.isCharge);
                         data.data.travellerList.map((v,i) => {
                             v.key = v.travellerId
                         })
@@ -143,11 +144,14 @@ class AddAppointment extends React.Component {
     
     //控制收费类型显示与隐藏
     typeShow = (value) => {
-        
         if(value * 1){
             $('.type').show()
         }else{
             $('.type').hide()
+            this.props.form.setFieldsValue({
+                type:undefined,
+                price:'',
+            })
         }
     }
 
@@ -272,7 +276,7 @@ class AddAppointment extends React.Component {
         const _this = this
         const val = this.props.form.getFieldsValue()
         if(!val.trainTime && !val.trainCode){
-            Message.success('请填写高铁日期和高铁车次')
+            Message.error('请填写高铁日期和高铁车次')
         }else{
             $.ajax({
                 type: "GET",
@@ -436,10 +440,12 @@ class AddAppointment extends React.Component {
                         values.productName = product[1]  
                     }else{
                         values.productId = _this.state.updateInfo.productId
-                        values.productName = product[0]  
+                        values.productName = product[0]
                     }
                     //是否收费
-                    //values.isCharge =  values.isCharge == '是' ? 1 : 0           
+                    values.isCharge =  values.isCharge == '是' ? 1 : values.isCharge == '否' ? 0 : values.isCharge
+                    //收费类型
+                    values.type =  values.type == '现金' ? 2 : values.type == '刷卡' ? 3 : values.type == '网络' ? 4 : values.type
                     //是否删除
                     values.isDeleted = 0
                     //状态
@@ -739,7 +745,7 @@ class AddAppointment extends React.Component {
                                      {getFieldDecorator('travellerNum', {
                                          
                                      })(
-                                        <Input placeholder="请填写服务人次" />
+                                        <Input type='number' placeholder="请填写服务人次" />
                                     )}
                                 </FormItem>
                             </Col>
@@ -783,7 +789,7 @@ class AddAppointment extends React.Component {
                                     {getFieldDecorator('price', {
                                         
                                     })(
-                                        <Input placeholder="请填写服务价格" />
+                                        <Input type='number' placeholder="请填写服务价格" />
                                     )}
                                 </FormItem>
                             </Col>

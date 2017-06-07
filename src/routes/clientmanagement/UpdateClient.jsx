@@ -1,7 +1,7 @@
 import './client.less';
 import React from 'react';
 import { hashHistory } from 'react-router';
-import {Form, Row, Col, Input, Button, Icon,Select,message,Radio,AutoComplete } from 'antd';
+import {Form, Row, Col, Input, Button, Icon,Select,Message,Radio,AutoComplete } from 'antd';
 import { Link} from 'react-router';
 import $ from 'jquery';
 import { serveUrl, User, cacheData} from '../../utils/config';
@@ -130,9 +130,13 @@ class UpdateClient extends React.Component {
                                                         data: JSON.stringify(formatData),
                                                         success: function (data) {
                                                             if (data.status == 200) {
-                                                                message.success(data.msg);
+                                                                Message.success(data.msg);
                                                                 _this.props.handleEditClick();
                                                                 _this.props.form.resetFields();
+                                                            }else if(data.status == 200){
+                                                                Message.error(data.msg);
+                                                            }else{
+                                                                Message.error(data.msg);
                                                             }
                                                         }
                                                     });

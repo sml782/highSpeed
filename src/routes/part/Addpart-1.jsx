@@ -155,7 +155,7 @@ class ServiceList extends React.Component {
     handleOkAdd = () => {
         this.setState({ visibleAdd:false })
     }
-    handleCancelAdd = () => {
+    handleCancelAdd = (cb) => {
         this.setState({ visibleAdd:false })
     }
     //保存高铁休息室
@@ -328,7 +328,7 @@ class ServiceList extends React.Component {
                                 {getFieldDecorator('description', {
                                     rules: [{ required: true, message: '请输入角色密码!' }],
                                 })(
-                                    <Input  placeholder="请输入角色密码" style={{width:358}}  className='required'/>
+                                    <Input type='password'  placeholder="请输入角色密码" style={{width:358}}  className='required'/>
                                 )}
                             </FormItem>
                         </Col>

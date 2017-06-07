@@ -109,10 +109,10 @@ class Passenger extends React.Component {
                             >
                                 {getFieldDecorator('phoneNumber', {
                                     rules: [{
-                                        required:true, pattern:/^1[3|4|5|7|8][0-9]\d{4,8}$/gi, message: '请输入手机号!',
+                                        required:true, pattern:/^1[3|4|5|7|8][0-9]\d{4,8}$/gi, message: '请输入正确的手机号!',
                                     }],
                                 })(
-                                    <Input />
+                                    <Input type='number' />
                                 )}
                             </FormItem>
                  

@@ -314,7 +314,7 @@ class Editpart extends React.Component {
 
 
                     <Form layout='horizontal' style={{marginTop:44}}>
-                        <Row>
+                        <Row style={{marginBottom:20}}>
                             <FormItem label="角色名称" {...formItemLayout} hasFeedback required >
                                 {getFieldDecorator('name', {
                                     rules: [{ required: true, message: '请输入角色名称!' }],
@@ -326,7 +326,7 @@ class Editpart extends React.Component {
                             </FormItem>
                         </Row>
 
-                        <Row>
+                        <Row style={{marginBottom:20}}>
                             <FormItem label="登录账号" {...formItemLayout} hasFeedback required >
                                 {getFieldDecorator('account', {
                                     rules: [{ required: true, message: '请输入登录账号!' }],
@@ -352,7 +352,7 @@ class Editpart extends React.Component {
                         </div>
 
                         <Row style={{marginTop:50 }}>
-                            <Col span={24} style={{ textAlign: 'center'}} className="mb44">
+                            <Col span={24} style={{ textAlign: 'center', width: 600}} className="mb44">
                                 <FormItem>
                                     <span className='btn-search' style={{display:'inline-block'}} onClick={this.handleSubmit}>保存</span>
                                     &nbsp;&nbsp;&nbsp;
@@ -369,7 +369,7 @@ class Editpart extends React.Component {
                         onCancel={this.handleCancelAdd.bind(this)}
                     >
                         <div>
-                            <AddPartLounge addProduct={this.addProduct} />
+                            <AddPartLounge addProduct={this.addProduct} addCancle={_this.handleCancelAdd.bind(_this)} />
                         </div>
                     </Modal>
 

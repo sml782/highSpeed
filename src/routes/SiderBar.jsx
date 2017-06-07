@@ -64,15 +64,15 @@ class SiderBar extends React.Component {
 
     //刷新对应key
     refreshMenu = (pathname) => {
-        var key = '';
+        var key = '0';
         switch (pathname){
+            case '/':
+                key = '0';
+                break;
             case '/order':
                 key = '0';
                 break;
             case '/addAppointment':
-                key = '0';
-                break;
-            case '/updateAppointment':
                 key = '0';
                 break;
             case '/serviceBillings':
@@ -99,6 +99,11 @@ class SiderBar extends React.Component {
             case '/products':
                 key = '5';
                 break;
+        }
+        if(/^\/updateAppointment/.test(pathname)){
+            key = '0';
+        }else if(/^\/editPart/.test(pathname)){
+            key = '2';
         }
         this.setState({
             current: [key]

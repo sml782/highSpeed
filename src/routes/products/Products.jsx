@@ -33,8 +33,6 @@ class ServiceList extends React.Component {
             visibleDel:false,
             visibleAdd:false,
             visibleUpdate:false,
-            addKey:0,
-            updateKey:10,
             autoCompleteResult:[],
             sortedInfo:{},
             filteredInfo:{},
@@ -166,9 +164,6 @@ class ServiceList extends React.Component {
     showAdd = (record) => {
         const _this = this
         this.setState({ visibleAdd:true })
-        
-        var addKey = this.state.addKey
-        this.setState({ addKey:++addKey })
     }
     //添加确认
     handleOk(){
@@ -179,6 +174,7 @@ class ServiceList extends React.Component {
     //取消添加
     handleCancel(){
         this.setState({visibleAdd:false})
+        this.getInitList(this.state.productListDateCurrent,this.state.productsListDatePageSize)
     }
 
     //修改产品弹窗
@@ -186,9 +182,7 @@ class ServiceList extends React.Component {
         const _this = this
         this.setState({ visibleUpdate:true })
         if(!record.dispatchConfig){
-            
-            var updateKey = this.state.updateKey
-            this.setState({ updateKey:++updateKey, handleKey: record.productId,selectedProduct:record })
+            this.setState({ handleKey: record.productId,selectedProduct:record })
         }else{
             this.setState({ selectedProduct: {},handleKey:undefined })
         }
@@ -355,20 +349,20 @@ class ServiceList extends React.Component {
                      </div>
                  </Modal>
                  <Modal title="添加"
-                     key={this.state.addKey}
+                     key={Math.random() * Math.random()}
                      visible={this.state.visibleAdd}
                      onOk={this.handleOk.bind(this)}
                      onCancel={this.handleCancel.bind(this)}
                  >
-                     <AddProducts getInitList={_this.getInitList.bind(_this)} handleCancel={_this.handleCancel.bind(_this)} />
+                     <AddProducts handleCancel={_this.handleCancel.bind(_this)} />
                  </Modal>
                  <Modal title="编辑"
-                     key={this.state.updateKey}
+                     key={Math.random() * Math.random()}
                      visible={this.state.visibleUpdate}
                      onOk={this.handleUpdateOk.bind(this)}
                      onCancel={this.handleUpdateCancel.bind(this)}
                  >
-                     <UpdateProducts getInitList={_this.getInitList.bind(_this)} handleUpdateCancel={_this.handleUpdateCancel.bind(_this)} selectedProduct={_this.state.selectedProduct} />
+                     <UpdateProducts handleUpdateCancel={_this.handleUpdateCancel.bind(_this)} selectedProduct={_this.state.selectedProduct} />
                  </Modal>
             </div>
         )

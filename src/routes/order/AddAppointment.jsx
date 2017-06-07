@@ -62,6 +62,10 @@ class AddAppointment extends React.Component {
             $('.type').show()
         }else{
             $('.type').hide()
+            this.props.form.setFieldsValue({
+                type:'',
+                price:'',
+            })
         }
     }
 
@@ -181,7 +185,7 @@ class AddAppointment extends React.Component {
         const _this = this
         const val = this.props.form.getFieldsValue()
         if(!val.trainTime && !val.trainCode){
-            Message.success('请填写高铁日期和高铁车次')
+            Message.error('请填写高铁日期和高铁车次')
         }else{
             $.ajax({
                 type: "GET",
@@ -340,7 +344,9 @@ class AddAppointment extends React.Component {
                     values.productId = product[0]
                     values.productName = product[1]  
                     //是否收费
-                    //values.isCharge =  values.isCharge ? 1 : 0                    
+                    values.isCharge =  values.isCharge == '是' ? 1 : values.isCharge == '否' ? 0 : values.isCharge
+                    //收费类型
+                    values.type =  values.type == '现金' ? 2 : values.type == '刷卡' ? 3 : values.type == '网络' ? 4 : values.type               
                     //是否删除
                     values.isDeleted = 0
                     //状态
@@ -460,6 +466,7 @@ class AddAppointment extends React.Component {
                                     })(
                                         <AutoComplete
                                             dataSource={_this.state.clientName}
+                                            onFocus={_this.clientChange.bind(_this)}
                                             onSearch={_this.clientChange.bind(_this)}
                                             onSelect={_this.selectClient.bind(_this)}
                                             placeholder="请输入客户名称"
@@ -632,7 +639,7 @@ class AddAppointment extends React.Component {
                                      {getFieldDecorator('travellerNum', {
                                          
                                      })(
-                                        <Input placeholder="请填写服务人次" />
+                                        <Input type='number' placeholder="请填写服务人次" />
                                     )}
                                 </FormItem>
                             </Col>
@@ -676,7 +683,7 @@ class AddAppointment extends React.Component {
                                     {getFieldDecorator('price', {
                                         
                                     })(
-                                        <Input placeholder="请填写服务价格" />
+                                        <Input type='number' placeholder="请填写服务价格" />
                                     )}
                                 </FormItem>
                             </Col>
@@ -698,6 +705,7 @@ class AddAppointment extends React.Component {
                                     })(
                                          <AutoComplete
                                             dataSource={_this.state.registerName}
+                                            onFocus={_this.registerChange.bind(_this)}
                                             onSearch={_this.registerChange.bind(_this)}
                                             placeholder="请输入登记人"
                                         >

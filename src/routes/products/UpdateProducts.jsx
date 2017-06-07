@@ -210,9 +210,9 @@ class UpdateProducts extends React.Component {
                         )}
                     >
                         {getFieldDecorator('price', {
-                            
+                            rules: [{ pattern:/\d+/ ,message: '请输入高铁站!' }],
                         })(
-                            <Input placeholder="请输入零售价格" />
+                            <Input type='number' placeholder="请输入零售价格" />
                         )}
                     </FormItem>
                    

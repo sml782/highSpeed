@@ -169,8 +169,6 @@ class Client extends React.Component {
         this.setState({
             visibleEdit: true,
             clientId:record.clientId,
-            addKey:Math.random()*Math.random(),
-            updateKey:Math.random()*Math.random()
         });
         
     }
@@ -204,6 +202,8 @@ class Client extends React.Component {
                         visibleEdit: false
                     });
                     _this.getInitList(_this.state.clientListDateCurrent,_this.state.clientListDatePageSize);
+                }else if(data.status == 5001){
+                    Message.error(data.msg)
                 }
             }
         });
@@ -368,7 +368,7 @@ class Client extends React.Component {
 
                 <div>
                     <Modal title="添加"
-                        key={this.state.addKey}
+                        key={Math.random() * Math.random()}
                         visible={this.state.visibleAdd}
                         onOk={this.handleOk.bind(this)}
                         onCancel={this.handleCancel.bind(this)}
@@ -381,7 +381,7 @@ class Client extends React.Component {
 
                 <div>
                     <Modal title="编辑"
-                        key={this.state.updateKey}
+                        key={Math.random() * Math.random()}
                         visible={this.state.visibleEdit}
                         onOk={this.handleEditOk.bind(this)}
                         onCancel={this.handleEditCancel.bind(this)}

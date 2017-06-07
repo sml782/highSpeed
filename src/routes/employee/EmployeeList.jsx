@@ -32,8 +32,6 @@ class ServiceList extends React.Component {
             selectedEm:{},
             selectedRowKeys: [],
             visibleDel:false,
-            addKey:0,
-            updateKey:10,
             visibleAdd:false,
             visibleUpdate:false,
             trainStationResult:[],
@@ -141,24 +139,19 @@ class ServiceList extends React.Component {
     }
     //添加员工
     addEmployeeBtn=()=>{
-        this.setState({ visibleAdd: true,addKey:Math.random() * Math.random() })
+        this.setState({ visibleAdd: true})
     }
 
 
-    //添加确认
+    //添加确认/取消
     handleOk(){
         this.setState({ visibleAdd: false})
         this.getInitList(this.state.employeeCurrent,this.state.employeePageSize)
     }
 
-    //取消添加
-    handleCancel(){
-        this.setState({visibleAdd:false, }) 
-    }
-
     //修改员工
     updateEmployeeBtn=(record)=>{
-        this.setState({ visibleUpdate: true,updateKey:Math.random() * Math.random() })
+        this.setState({ visibleUpdate: true})
         const _this = this
         
         _this.setState({
@@ -167,16 +160,12 @@ class ServiceList extends React.Component {
     }
 
 
-    //修改确认
+    //修改确认/取消
     handleUpdateOk(){
         this.setState({ visibleUpdate: false, returnData:null})
         this.getInitList(this.state.employeeCurrent,this.state.employeePageSize)
     }
 
-    //修改取消
-    handleUpdateCancel(){
-        this.setState({returnData:null,visibleUpdate:false, }) 
-    }
 
     showTotal(total) {
       return `共 ${total} 条`;
@@ -288,20 +277,20 @@ class ServiceList extends React.Component {
                     </Row>
                  </div>
                  <Modal title="添加员工"
-                     key={this.state.addKey}
+                     key={Math.random() * Math.random()}
                      visible={this.state.visibleAdd}
                      onOk={this.handleOk.bind(this)}
-                     onCancel={this.handleCancel.bind(this)}
+                     onCancel={this.handleOk.bind(this)}
                  >
-                     <AddEmployee handleOk={_this.handleOk.bind(_this)} handleCancel={_this.handleCancel.bind(_this)} />
+                     <AddEmployee handleOk={_this.handleOk.bind(_this)} />
                  </Modal>
                  <Modal title="编辑员工"
-                     key={this.state.updateKey}
+                     key={Math.random() * Math.random()}
                      visible={this.state.visibleUpdate}
                      onOk={this.handleUpdateOk.bind(this)}
-                     onCancel={this.handleUpdateCancel.bind(this)}
+                     onCancel={this.handleUpdateOk.bind(this)}
                  >
-                     <UpdateEmployee handleData={this.state.returnData} handleOk={_this.handleUpdateOk.bind(_this)} handleCancel={_this.handleUpdateCancel.bind(_this)} />
+                     <UpdateEmployee handleData={this.state.returnData} handleOk={_this.handleUpdateOk.bind(_this)}/>
                  </Modal>
             </div>
         )
